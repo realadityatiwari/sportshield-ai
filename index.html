@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Media Authenticity</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="top-badge">AI-Powered Media Monitoring System</div>
+        <header>
+            <h1>Media Authenticity Check</h1>
+            <p>Upload sports media to detect potential unauthorized usage.</p>
+            <p class="explanation">This system compares visual fingerprints of media to detect duplication or misuse.</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <input type="file" id="imageInput" accept="image/*" class="file-input">
+                <label for="imageInput" class="upload-label">
+                    <span id="uploadText">Choose an image</span>
+                </label>
+            </div>
+
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <img id="imagePreview" src="" alt="Image Preview">
+            </div>
+
+            <div class="button-group">
+                <button id="registerButton" class="action-btn secondary-btn" disabled>Register as Official Media</button>
+                <button id="checkButton" class="action-btn" disabled>Check Authenticity</button>
+            </div>
+            <div id="registerFeedback" class="register-feedback" style="display: none;"></div>
+
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="loader" id="loader" style="display: none;"></div>
+                <div id="statusMessage" style="display: none;"></div>
+                <div id="resultContent" style="display: none;">
+                    <div id="resultAlert">
+                        <h2 id="resultTitle"></h2>
+                        <p id="resultSubtext" class="result-subtext"></p>
+                    </div>
+                    <div id="sourceLabels" class="source-labels" style="display: none;"></div>
+                    <div class="confidence-score">
+                        Match Confidence: <span id="scoreValue"></span>
+                    </div>
+                    
+                    <div id="trackingTimeline" class="tracking-timeline" style="display: none;">
+                        <h3>Content Propagation</h3>
+                        <ul id="timelineList" class="timeline-list"></ul>
+                    </div>
+
+                    <div id="actionCenter" class="action-center" style="display: none;">
+                        <h3>Action Center</h3>
+                        <ul class="action-list">
+                            <li>⚠️ Alert Generated</li>
+                            <li>Notification sent to media owner</li>
+                            <li>Recommended Action: Issue takedown request</li>
+                        </ul>
+                        <button id="takedownButton" class="action-btn warning-btn">Simulate Takedown Request</button>
+                        <div id="takedownFeedback" class="takedown-feedback" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="app-footer">
+            Designed for sports organizations to protect digital media rights
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
