@@ -3,71 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Media Authenticity</title>
+    <title>SportShield AI Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for Dashboard Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <div class="top-badge">AI-Powered Media Monitoring System</div>
-        <header>
-            <h1>Media Authenticity Check</h1>
-            <p>Upload sports media to detect potential unauthorized usage.</p>
-            <p class="explanation">This system compares visual fingerprints of media to detect duplication or misuse.</p>
-        </header>
-
-        <main>
-            <div class="upload-section">
-                <input type="file" id="imageInput" accept="image/*" class="file-input">
-                <label for="imageInput" class="upload-label">
-                    <span id="uploadText">Choose an image</span>
-                </label>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fa-solid fa-shield-halved text-primary"></i> Sport<span class="text-primary">Shield</span> <span class="badge-sm">AI</span></h2>
             </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item" data-target="page-dashboard">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item active" data-target="page-upload">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Media Upload
+                </a>
+                <a href="#" class="nav-item" data-target="page-monitoring">
+                    <i class="fa-solid fa-desktop"></i> Monitoring
+                </a>
+                <a href="#" class="nav-item" data-target="page-alerts">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Alerts
+                </a>
+                <a href="#" class="nav-item" data-target="page-analytics">
+                    <i class="fa-solid fa-chart-pie"></i> Analytics
+                </a>
+            </nav>
+        </aside>
 
-            <div class="preview-section" id="previewSection" style="display: none;">
-                <img id="imagePreview" src="" alt="Image Preview">
-            </div>
-
-            <div class="button-group">
-                <button id="registerButton" class="action-btn secondary-btn" disabled>Register as Official Media</button>
-                <button id="checkButton" class="action-btn" disabled>Check Authenticity</button>
-            </div>
-            <div id="registerFeedback" class="register-feedback" style="display: none;"></div>
-
-            <div class="result-section" id="resultSection" style="display: none;">
-                <div class="loader" id="loader" style="display: none;"></div>
-                <div id="statusMessage" style="display: none;"></div>
-                <div id="resultContent" style="display: none;">
-                    <div id="resultAlert">
-                        <h2 id="resultTitle"></h2>
-                        <p id="resultSubtext" class="result-subtext"></p>
-                    </div>
-                    <div id="sourceLabels" class="source-labels" style="display: none;"></div>
-                    <div class="confidence-score">
-                        Match Confidence: <span id="scoreValue"></span>
-                    </div>
-                    
-                    <div id="trackingTimeline" class="tracking-timeline" style="display: none;">
-                        <h3>Content Propagation</h3>
-                        <ul id="timelineList" class="timeline-list"></ul>
-                    </div>
-
-                    <div id="actionCenter" class="action-center" style="display: none;">
-                        <h3>Action Center</h3>
-                        <ul class="action-list">
-                            <li>⚠️ Alert Generated</li>
-                            <li>Notification sent to media owner</li>
-                            <li>Recommended Action: Issue takedown request</li>
-                        </ul>
-                        <button id="takedownButton" class="action-btn warning-btn">Simulate Takedown Request</button>
-                        <div id="takedownFeedback" class="takedown-feedback" style="display: none;"></div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div class="search-bar">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" placeholder="Search media, IDs, or alerts...">
+                </div>
+                <div class="user-actions">
+                    <button class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notification-badge">3</span></button>
+                    <div class="user-profile">
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=2563eb&color=fff" alt="User">
+                        <div class="user-info">
+                            <span class="user-name">Admin User</span>
+                            <span class="user-role">Superadmin</span>
+                        </div>
                     </div>
                 </div>
+            </header>
+
+            <!-- Page Views -->
+            <div class="page-container">
+                
+                <!-- DASHBOARD PAGE (Mock) -->
+                <div id="page-dashboard" class="page-view" style="display: none;">
+                    <div class="page-header">
+                        <h1>Overview</h1>
+                        <p>High-level metrics and system activity.</p>
+                    </div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fa-solid fa-photo-film"></i></div>
+                            <div class="metric-info">
+                                <h3>Total Media Registered</h3>
+                                <p>12,458</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon danger-icon"><i class="fa-solid fa-fingerprint"></i></div>
+                            <div class="metric-info">
+                                <h3>Unauthorized Detections</h3>
+                                <p>342</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon warning-icon"><i class="fa-solid fa-bell"></i></div>
+                            <div class="metric-info">
+                                <h3>Active Alerts</h3>
+                                <p>28</p>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon success-icon"><i class="fa-solid fa-bullseye"></i></div>
+                            <div class="metric-info">
+                                <h3>Detection Accuracy</h3>
+                                <p>99.4%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-panels">
+                        <div class="panel">
+                            <h3>Detection Timeline (30 Days)</h3>
+                            <div class="mock-chart">
+                                <div class="bar" style="height: 40%"></div>
+                                <div class="bar" style="height: 60%"></div>
+                                <div class="bar" style="height: 30%"></div>
+                                <div class="bar" style="height: 80%"></div>
+                                <div class="bar" style="height: 50%"></div>
+                                <div class="bar" style="height: 90%"></div>
+                                <div class="bar" style="height: 70%"></div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>Recent Activity</h3>
+                            <ul class="activity-feed">
+                                <li>
+                                    <div class="feed-point"></div>
+                                    <div class="feed-content">
+                                        <p><strong>System</strong> flagged unauthorized stream segment.</p>
+                                        <span class="time">10 mins ago</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feed-point"></div>
+                                    <div class="feed-content">
+                                        <p><strong>Admin</strong> registered 45 new match assets.</p>
+                                        <span class="time">1 hour ago</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feed-point"></div>
+                                    <div class="feed-content">
+                                        <p><strong>Automated Takedown</strong> issued for Alert #892.</p>
+                                        <span class="time">2 hours ago</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEDIA UPLOAD PAGE (Active Tool) -->
+                <div id="page-upload" class="page-view">
+                    <div class="page-header">
+                        <h1>Media Setup & Verification</h1>
+                        <p>Upload sports media to register official content or scan for unauthorized reproduction.</p>
+                    </div>
+
+                    <div class="upload-container-card">
+                        <!-- Tabs -->
+                        <div class="upload-tabs">
+                            <button class="tab-btn active"><i class="fa-solid fa-image"></i> Image</button>
+                            <button class="tab-btn" disabled><i class="fa-solid fa-video"></i> Video</button>
+                            <button class="tab-btn" disabled><i class="fa-solid fa-file-audio"></i> Audio</button>
+                        </div>
+
+                        <!-- Original UI Block -->
+                        <div class="upload-section">
+                            <input type="file" id="imageInput" accept="image/*" class="file-input">
+                            <label for="imageInput" class="upload-label">
+                                <div class="upload-icon-wrapper">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                </div>
+                                <span class="upload-title">Drag and drop media here</span>
+                                <span class="upload-subtitle">or click to browse from your computer</span>
+                                <span id="uploadText" class="upload-filename"></span>
+                            </label>
+                        </div>
+
+                        <div class="preview-section" id="previewSection" style="display: none;">
+                            <img id="imagePreview" src="" alt="Image Preview">
+                        </div>
+
+                        <div class="button-group">
+                            <button id="registerButton" class="action-btn secondary-btn" disabled><i class="fa-solid fa-database"></i> Register Official Media</button>
+                            <button id="checkButton" class="action-btn primary-btn" disabled><i class="fa-solid fa-shield-halved"></i> Check Authenticity</button>
+                        </div>
+                        <div id="registerFeedback" class="register-feedback" style="display: none;"></div>
+
+                        <!-- Scan Results -->
+                        <div class="result-section" id="resultSection" style="display: none;">
+                            <div class="loader-wrapper" id="loader" style="display:none;">
+                                <div class="spinner"></div>
+                            </div>
+                            <div id="statusMessage" class="status-message" style="display: none;"></div>
+                            
+                            <div id="resultContent" style="display: none;">
+                                <div id="resultAlert">
+                                    <h2 id="resultTitle"></h2>
+                                    <p id="resultSubtext" class="result-subtext"></p>
+                                </div>
+                                <div id="sourceLabels" class="source-labels" style="display: none;"></div>
+                                
+                                <div class="confidence-score">
+                                    <span>Match Confidence:</span>
+                                    <span id="scoreValue"></span>
+                                </div>
+                                
+                                <div class="result-panels-grid">
+                                    <div id="trackingTimeline" class="tracking-timeline" style="display: none;">
+                                        <h3>Content Propagation</h3>
+                                        <ul id="timelineList" class="timeline-list"></ul>
+                                    </div>
+
+                                    <div id="actionCenter" class="action-center" style="display: none;">
+                                        <h3>Action Center</h3>
+                                        <ul class="action-list">
+                                            <li><i class="fa-solid fa-triangle-exclamation"></i> Alert Generated</li>
+                                            <li><i class="fa-solid fa-envelope"></i> Notification sent to owner</li>
+                                            <li><i class="fa-solid fa-gavel"></i> Recommended: Issue takedown</li>
+                                        </ul>
+                                        <button id="takedownButton" class="action-btn warning-btn">Simulate Takedown</button>
+                                        <div id="takedownFeedback" class="takedown-feedback" style="display: none;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MONITORING PAGE (Mock) -->
+                <div id="page-monitoring" class="page-view" style="display: none;">
+                    <div class="page-header">
+                        <h1>Monitoring Feed</h1>
+                        <p>Live feed of media being scanned across global networks.</p>
+                    </div>
+                    <div class="panel table-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Media</th>
+                                    <th>Status</th>
+                                    <th>Confidence</th>
+                                    <th>Detected On</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div class="thumb-mock mock-img-1"></div></td>
+                                    <td><span class="badge badge-success">Original</span></td>
+                                    <td>---</td>
+                                    <td>Internal Upload</td>
+                                    <td>10:42 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><div class="thumb-mock mock-img-2"></div></td>
+                                    <td><span class="badge badge-danger">Unauthorized</span></td>
+                                    <td>94.2%</td>
+                                    <td>Sports Network Z</td>
+                                    <td>09:15 AM</td>
+                                </tr>
+                                <tr>
+                                    <td><div class="thumb-mock mock-img-3"></div></td>
+                                    <td><span class="badge badge-danger">Unauthorized</span></td>
+                                    <td>87.9%</td>
+                                    <td>Social Platform Y</td>
+                                    <td>08:30 AM</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ALERTS PAGE (Mock) -->
+                <div id="page-alerts" class="page-view" style="display: none;">
+                    <div class="page-header">
+                        <h1>Alert Management</h1>
+                        <p>Review and act upon high-confidence un-authorized match alerts.</p>
+                    </div>
+                    <div class="alerts-list">
+                        <div class="alert-card high-severity">
+                            <div class="alert-info">
+                                <h3>Unauthorized Broadcast Rip</h3>
+                                <p>Detected on: Social Platform Y (94.2% Match)</p>
+                            </div>
+                            <button class="action-btn warning-btn sm-btn">Issue Takedown</button>
+                        </div>
+                        <div class="alert-card medium-severity">
+                            <div class="alert-info">
+                                <h3>Potential Logo Misuse</h3>
+                                <p>Detected on: Blog Network X (76.5% Match)</p>
+                            </div>
+                            <button class="action-btn secondary-btn sm-btn">Review</button>
+                        </div>
+                        <div class="alert-card resolved">
+                            <div class="alert-info">
+                                <h3>Bootleg Highlight Reel</h3>
+                                <p>Status: Takedown Successful</p>
+                            </div>
+                            <span class="status-icon"><i class="fa-solid fa-check"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS PAGE (Mock) -->
+                <div id="page-analytics" class="page-view" style="display: none;">
+                    <div class="page-header">
+                        <h1>System Analytics</h1>
+                        <p>Performance metrics and detection distribution trends.</p>
+                    </div>
+                    <div class="dashboard-panels">
+                        <div class="panel chart-panel">
+                            <h3>Platform Distribution</h3>
+                            <div class="mock-pie-chart">
+                                <i class="fa-solid fa-chart-pie fa-6x" style="color:var(--primary); opacity: 0.2;"></i>
+                                <p style="margin-top:20px; color:var(--text-muted); font-weight:500;">
+                                    <span style="color:var(--primary)">Social Media (55%)</span> • 
+                                    <span style="color:var(--danger)">Streaming (30%)</span> • 
+                                    <span>Blogs (15%)</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>Top Flagged Assets</h3>
+                            <ul class="activity-feed">
+                                <li>
+                                    <div class="feed-point black-point"></div>
+                                    <div class="feed-content">
+                                        <p><strong>Asset ID #4092:</strong> 42 detections today</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feed-point black-point"></div>
+                                    <div class="feed-content">
+                                        <p><strong>Asset ID #8812:</strong> 18 detections today</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feed-point black-point"></div>
+                                    <div class="feed-content">
+                                        <p><strong>Asset ID #1209:</strong> 12 detections today</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
-        
-        <footer class="app-footer">
-            Designed for sports organizations to protect digital media rights
-        </footer>
     </div>
     <script src="script.js"></script>
 </body>

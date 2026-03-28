@@ -59,6 +59,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const takedownButton = document.getElementById("takedownButton");
     const takedownFeedback = document.getElementById("takedownFeedback");
 
+    // Dashboard Navigation Logic
+    const navItems = document.querySelectorAll('.nav-item');
+    const pageViews = document.querySelectorAll('.page-view');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Swap active nav states
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+
+            // Swap view visibility
+            pageViews.forEach(page => page.style.display = 'none');
+            const targetId = item.getAttribute('data-target');
+            const targetPage = document.getElementById(targetId);
+            if(targetPage) {
+                targetPage.style.display = 'block';
+            }
+        });
+    });
+
     // Handle Image Upload Selection
     imageInput.addEventListener("change", function(event) {
         const file = event.target.files[0];
