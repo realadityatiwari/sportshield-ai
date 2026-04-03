@@ -418,3 +418,28 @@ h1, h2, h3, h4 { color: var(--text-main); font-weight: 600; }
 .status-icon { color: var(--success); font-size: 20px;}
 
 .register-feedback { color: var(--success); font-size: 14px; margin-top: 16px; font-weight: 600; text-align: center; }
+
+/* Progress Bar */
+.progress-bar-container { width: 100%; height: 8px; background-color: var(--border); border-radius: 4px; margin-top: 12px; overflow: hidden; }
+.progress-bar-fill { height: 100%; width: 0%; background-color: var(--success); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease; }
+
+/* Empty States */
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+.empty-state i { font-size: 32px; margin-bottom: 16px; color: #cbd5e1; }
+.empty-state p { font-size: 14px; font-weight: 500; }
+
+/* Filter Tabs */
+.filter-tabs { display: flex; gap: 8px; background-color: var(--bg-color); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+.filter-btn { background: transparent; border: none; padding: 6px 12px; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+.filter-btn.active { background-color: var(--primary); color: white; }
+.filter-btn:hover:not(.active) { background-color: #e2e8f0; }
+
+/* Table Enhancements */
+.row-unauthorized { background-color: rgba(239, 68, 68, 0.04); }
+.row-unauthorized:hover { background-color: rgba(239, 68, 68, 0.08) !important; }
+.mini-progress-bar { width: 80px; height: 6px; background-color: #cbd5e1; border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 8px; }
+.mini-progress-fill { height: 100%; }
+
+/* Pie Chart override */
+.mock-pie-chart[style*="conic-gradient"] { i { display: none; } p { display: none; } }
+

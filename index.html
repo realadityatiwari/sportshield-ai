@@ -43,6 +43,7 @@
                     <input type="text" placeholder="Search media, IDs, or alerts...">
                 </div>
                 <div class="user-actions">
+                    <button class="icon-btn" id="simToggleBtn" title="Toggle Live Simulation"><i class="fa-solid fa-play" style="color:var(--success);"></i></button>
                     <button class="icon-btn"><i class="fa-regular fa-bell"></i><span class="notification-badge">3</span></button>
                     <div class="user-profile">
                         <img src="https://ui-avatars.com/api/?name=Admin+User&background=2563eb&color=fff" alt="User">
@@ -69,28 +70,28 @@
                             <div class="metric-icon"><i class="fa-solid fa-photo-film"></i></div>
                             <div class="metric-info">
                                 <h3>Total Media Registered</h3>
-                                <p>12,458</p>
+                                <p id="metricRegistered">0</p>
                             </div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-icon danger-icon"><i class="fa-solid fa-fingerprint"></i></div>
                             <div class="metric-info">
                                 <h3>Unauthorized Detections</h3>
-                                <p>342</p>
+                                <p id="metricDetections">0</p>
                             </div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-icon warning-icon"><i class="fa-solid fa-bell"></i></div>
                             <div class="metric-info">
                                 <h3>Active Alerts</h3>
-                                <p>28</p>
+                                <p id="metricAlerts">0</p>
                             </div>
                         </div>
                         <div class="metric-card">
                             <div class="metric-icon success-icon"><i class="fa-solid fa-bullseye"></i></div>
                             <div class="metric-info">
                                 <h3>Detection Accuracy</h3>
-                                <p>99.4%</p>
+                                <p id="metricAccuracy">---</p>
                             </div>
                         </div>
                     </div>
@@ -193,6 +194,9 @@
                                     <span>Match Confidence:</span>
                                     <span id="scoreValue"></span>
                                 </div>
+                                <div class="progress-bar-container" style="display:none;" id="confidenceBarContainer">
+                                    <div id="confidenceBarFill" class="progress-bar-fill"></div>
+                                </div>
                                 
                                 <div class="result-panels-grid">
                                     <div id="trackingTimeline" class="tracking-timeline" style="display: none;">
@@ -218,9 +222,16 @@
 
                 <!-- MONITORING PAGE (Mock) -->
                 <div id="page-monitoring" class="page-view" style="display: none;">
-                    <div class="page-header">
-                        <h1>Monitoring Feed</h1>
-                        <p>Live feed of media being scanned across global networks.</p>
+                    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                        <div>
+                            <h1>Monitoring Feed</h1>
+                            <p>Live feed of media being scanned across global networks.</p>
+                        </div>
+                        <div class="filter-tabs" id="monitoringFilterTabs">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="unauthorized">Unauthorized</button>
+                            <button class="filter-btn" data-filter="original">Original</button>
+                        </div>
                     </div>
                     <div class="panel table-panel">
                         <table class="data-table">
@@ -233,28 +244,8 @@
                                     <th>Time</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td><div class="thumb-mock mock-img-1"></div></td>
-                                    <td><span class="badge badge-success">Original</span></td>
-                                    <td>---</td>
-                                    <td>Internal Upload</td>
-                                    <td>10:42 AM</td>
-                                </tr>
-                                <tr>
-                                    <td><div class="thumb-mock mock-img-2"></div></td>
-                                    <td><span class="badge badge-danger">Unauthorized</span></td>
-                                    <td>94.2%</td>
-                                    <td>Sports Network Z</td>
-                                    <td>09:15 AM</td>
-                                </tr>
-                                <tr>
-                                    <td><div class="thumb-mock mock-img-3"></div></td>
-                                    <td><span class="badge badge-danger">Unauthorized</span></td>
-                                    <td>87.9%</td>
-                                    <td>Social Platform Y</td>
-                                    <td>08:30 AM</td>
-                                </tr>
+                            <tbody id="monitoringTableBody">
+                                <!-- Dynamic rows injected here -->
                             </tbody>
                         </table>
                     </div>
@@ -262,32 +253,18 @@
 
                 <!-- ALERTS PAGE (Mock) -->
                 <div id="page-alerts" class="page-view" style="display: none;">
-                    <div class="page-header">
-                        <h1>Alert Management</h1>
-                        <p>Review and act upon high-confidence un-authorized match alerts.</p>
+                    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                        <div>
+                            <h1>Alert Management</h1>
+                            <p>Review and act upon high-confidence un-authorized match alerts.</p>
+                        </div>
+                        <div class="filter-tabs" id="alertsFilterTabs">
+                            <button class="filter-btn active" data-filter="active">Active</button>
+                            <button class="filter-btn" data-filter="resolved">Resolved</button>
+                        </div>
                     </div>
-                    <div class="alerts-list">
-                        <div class="alert-card high-severity">
-                            <div class="alert-info">
-                                <h3>Unauthorized Broadcast Rip</h3>
-                                <p>Detected on: Social Platform Y (94.2% Match)</p>
-                            </div>
-                            <button class="action-btn warning-btn sm-btn">Issue Takedown</button>
-                        </div>
-                        <div class="alert-card medium-severity">
-                            <div class="alert-info">
-                                <h3>Potential Logo Misuse</h3>
-                                <p>Detected on: Blog Network X (76.5% Match)</p>
-                            </div>
-                            <button class="action-btn secondary-btn sm-btn">Review</button>
-                        </div>
-                        <div class="alert-card resolved">
-                            <div class="alert-info">
-                                <h3>Bootleg Highlight Reel</h3>
-                                <p>Status: Takedown Successful</p>
-                            </div>
-                            <span class="status-icon"><i class="fa-solid fa-check"></i></span>
-                        </div>
+                    <div class="alerts-list" id="alertsListContainer">
+                        <!-- Dynamic cards injected here -->
                     </div>
                 </div>
 
@@ -300,36 +277,12 @@
                     <div class="dashboard-panels">
                         <div class="panel chart-panel">
                             <h3>Platform Distribution</h3>
-                            <div class="mock-pie-chart">
-                                <i class="fa-solid fa-chart-pie fa-6x" style="color:var(--primary); opacity: 0.2;"></i>
-                                <p style="margin-top:20px; color:var(--text-muted); font-weight:500;">
-                                    <span style="color:var(--primary)">Social Media (55%)</span> • 
-                                    <span style="color:var(--danger)">Streaming (30%)</span> • 
-                                    <span>Blogs (15%)</span>
-                                </p>
-                            </div>
+                            <div class="mock-pie-chart" id="analyticsPlatformChart"></div>
+                            <div id="analyticsPlatformLegend" style="margin-top:20px; color:var(--text-muted); font-weight:500; display:flex; flex-wrap:wrap; justify-content:center; gap:16px; font-size:13px;"></div>
                         </div>
                         <div class="panel">
                             <h3>Top Flagged Assets</h3>
-                            <ul class="activity-feed">
-                                <li>
-                                    <div class="feed-point black-point"></div>
-                                    <div class="feed-content">
-                                        <p><strong>Asset ID #4092:</strong> 42 detections today</p>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="feed-point black-point"></div>
-                                    <div class="feed-content">
-                                        <p><strong>Asset ID #8812:</strong> 18 detections today</p>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="feed-point black-point"></div>
-                                    <div class="feed-content">
-                                        <p><strong>Asset ID #1209:</strong> 12 detections today</p>
-                                    </div>
-                                </li>
+                            <ul class="activity-feed" id="analyticsTopAssetsList">
                             </ul>
                         </div>
                     </div>
