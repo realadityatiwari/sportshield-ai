@@ -90,7 +90,7 @@
                         <div class="metric-card">
                             <div class="metric-icon success-icon"><i class="fa-solid fa-bullseye"></i></div>
                             <div class="metric-info">
-                                <h3>Detection Accuracy</h3>
+                                <h3>Original Content Ratio</h3>
                                 <p id="metricAccuracy">---</p>
                             </div>
                         </div>
@@ -197,6 +197,8 @@
                                 <div class="progress-bar-container" style="display:none;" id="confidenceBarContainer">
                                     <div id="confidenceBarFill" class="progress-bar-fill"></div>
                                 </div>
+                                <div id="confidenceExplanation" style="display:none; font-size: 13.5px; font-weight: 500; color: var(--text-muted); margin-top: 12px; padding: 12px; background: rgba(0,0,0,0.02); border-radius: 6px; border-left: 3px solid var(--primary); font-style: italic;"></div>
+                                <div style="font-size: 11px; color: var(--text-muted); opacity: 0.6; margin-top: 8px; text-align: right;"><i class="fa-solid fa-microchip"></i> Analyzed using perceptual hashing (pHash)</div>
                                 
                                 <div class="result-panels-grid">
                                     <div id="trackingTimeline" class="tracking-timeline" style="display: none;">

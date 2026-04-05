@@ -2,22 +2,43 @@ let mediaDB = [];
 let monitoringDB = [];
 let alertsDB = [];
 
+const MATCH_THRESHOLD = 85;
+
 let monitoringFilter = 'all'; // all, unauthorized, original
 let alertsFilter = 'active'; // active, resolved
 
 let simulationActive = false;
 let simulationInterval = null;
+let isProcessing = false; // Lock map blocking concurrent execution cycles
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
-function loadState() {
-    const savedMedia = localStorage.getItem('mediaDB');
-    const savedMonitoring = localStorage.getItem('monitoringDB');
-    const savedAlerts = localStorage.getItem('alertsDB');
+function cleanLegacyData(arr) {
+    if (!Array.isArray(arr)) return [];
+    return arr.map(e => {
+        if (e.thumbnail) delete e.thumbnail;
+        if (e.image) delete e.image;
+        if (e.src) delete e.src;
+        if (e.data) delete e.data;
+        return e;
+    });
+}
 
-    if (savedMedia) mediaDB = JSON.parse(savedMedia);
-    if (savedMonitoring) monitoringDB = JSON.parse(savedMonitoring);
-    if (savedAlerts) alertsDB = JSON.parse(savedAlerts);
+function loadState() {
+    try {
+        const savedMedia = localStorage.getItem('mediaDB');
+        if (savedMedia) mediaDB = cleanLegacyData(JSON.parse(savedMedia));
+    } catch(e) { console.warn("mediaDB corruption detected. Resetting."); localStorage.removeItem('mediaDB'); mediaDB = []; }
+    
+    try {
+        const savedMonitoring = localStorage.getItem('monitoringDB');
+        if (savedMonitoring) monitoringDB = cleanLegacyData(JSON.parse(savedMonitoring));
+    } catch(e) { console.warn("monitoringDB corruption detected. Resetting."); localStorage.removeItem('monitoringDB'); monitoringDB = []; }
+    
+    try {
+        const savedAlerts = localStorage.getItem('alertsDB');
+        if (savedAlerts) alertsDB = cleanLegacyData(JSON.parse(savedAlerts));
+    } catch(e) { console.warn("alertsDB corruption detected. Resetting."); localStorage.removeItem('alertsDB'); alertsDB = []; }
 }
 
 function saveState() {
@@ -116,22 +137,63 @@ function renderAnalytics() {
     });
 }
 
+let currentMetrics = { reg: -1, det: -1, alert: -1, acc: -1 };
+
+function animateValue(obj, start, end, duration, formatStr = "") {
+    if(!obj) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const currentVal = start + progress * (end - start);
+        
+        if (formatStr === "%") {
+            obj.textContent = currentVal.toFixed(1) + formatStr;
+        } else {
+            obj.textContent = Math.floor(currentVal).toLocaleString() + formatStr;
+        }
+        
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            if (formatStr === "%") {
+                obj.textContent = end.toFixed(1) + formatStr;
+            } else {
+                obj.textContent = end.toLocaleString() + formatStr;
+            }
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
 function renderDashboard() {
     const metricRegistered = document.getElementById("metricRegistered");
     const metricDetections = document.getElementById("metricDetections");
     const metricAlerts = document.getElementById("metricAlerts");
     const metricAccuracy = document.getElementById("metricAccuracy");
     
-    if (metricRegistered) metricRegistered.textContent = mediaDB.length.toLocaleString();
+    if (metricRegistered) {
+        const totalReg = mediaDB.length;
+        if (currentMetrics.reg !== totalReg) {
+            animateValue(metricRegistered, Math.max(0, currentMetrics.reg), totalReg, 1000);
+            currentMetrics.reg = totalReg;
+        }
+    }
     
     if (metricDetections) {
         const totalUnauthorized = monitoringDB.filter(m => m.status === 'unauthorized').length;
-        metricDetections.textContent = totalUnauthorized.toLocaleString();
+        if (currentMetrics.det !== totalUnauthorized) {
+            animateValue(metricDetections, Math.max(0, currentMetrics.det), totalUnauthorized, 1000);
+            currentMetrics.det = totalUnauthorized;
+        }
     }
     
     if (metricAlerts) {
         const activeAlerts = alertsDB.filter(a => a.status === 'active').length;
-        metricAlerts.textContent = activeAlerts.toLocaleString();
+        if (currentMetrics.alert !== activeAlerts) {
+            animateValue(metricAlerts, Math.max(0, currentMetrics.alert), activeAlerts, 1000);
+            currentMetrics.alert = activeAlerts;
+        }
     }
     
     if (metricAccuracy) {
@@ -140,7 +202,10 @@ function renderDashboard() {
         } else {
             const originalDetections = monitoringDB.filter(m => m.status === 'original').length;
             const accuracy = (originalDetections / monitoringDB.length) * 100;
-            metricAccuracy.textContent = accuracy.toFixed(1) + "%";
+            if (currentMetrics.acc !== accuracy) {
+                animateValue(metricAccuracy, Math.max(0, currentMetrics.acc), accuracy, 1000, "%");
+                currentMetrics.acc = accuracy;
+            }
         }
     }
     renderAnalytics(); 
@@ -168,10 +233,10 @@ function renderMonitoring() {
         const timeString = new Date(entry.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
         
         let miniProgressColor = "var(--success)";
-        if (entry.confidence >= 70 && entry.confidence < 85) miniProgressColor = "var(--warning)";
-        if (entry.confidence >= 85) miniProgressColor = "var(--danger)";
+        if (entry.confidence >= 70 && entry.confidence < MATCH_THRESHOLD) miniProgressColor = "var(--warning)";
+        if (entry.confidence >= MATCH_THRESHOLD) miniProgressColor = "var(--danger)";
         
-        const thumbUi = entry.thumbnail ? `<div class="thumb-mock" style="background: url('${entry.thumbnail}') center/cover;"></div>` : `<div class="thumb-mock" style="background:#e2e8f0; display:flex; align-items:center; justify-content:center; color:var(--text-muted);"><i class="fa-solid fa-image"></i></div>`;
+        const thumbUi = `<div class="thumb-mock" style="background:#e2e8f0; display:flex; align-items:center; justify-content:center; color:var(--text-muted);"><i class="fa-solid fa-image"></i></div>`;
         const platformIcon = getPlatformIcon(entry.platform);
         
         tableBody.innerHTML += `
@@ -215,7 +280,7 @@ function renderAlerts() {
     const sorted = [...filteredDB].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     
     sorted.forEach(alert => {
-        let severityClass = alert.confidence > 85 ? 'high-severity' : 'medium-severity';
+        let severityClass = alert.confidence >= MATCH_THRESHOLD ? 'high-severity' : 'medium-severity';
         if (alert.status === 'resolved') severityClass = 'resolved';
         
         const timeString = new Date(alert.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
@@ -245,19 +310,40 @@ function runSimulatedScan() {
     if (mediaDB.length === 0) return;
     
     const targetMedia = mediaDB[Math.floor(Math.random() * mediaDB.length)];
-    const platforms = ["Sports News Platform", "Social Media", "Streaming Platform", "Blog Network X", "Internal Processing"];
-    const platformDetected = platforms[Math.floor(Math.random() * platforms.length)];
     
-    const isOriginal = Math.random() > 0.3; // 70% chance of being original safe interaction
+    // Weighted Platform Probability Matrix
+    const platformWeights = [
+        { name: "Sports News Platform", weight: 10 },
+        { name: "Social Media", weight: 55 },
+        { name: "Streaming Platform", weight: 15 },
+        { name: "Blog Network X", weight: 15 },
+        { name: "Internal Processing", weight: 5 }
+    ];
+    
+    let totalWeight = platformWeights.reduce((sum, p) => sum + p.weight, 0);
+    let randomW = Math.random() * totalWeight;
+    let platformDetected = "Social Media"; // fallback tracker
+    
+    for (let p of platformWeights) {
+        if (randomW < p.weight) { platformDetected = p.name; break; }
+        randomW -= p.weight;
+    }
+    
+    // Time-based Variance Clustering (Activity Spikes every 60 seconds)
+    const cycle = (Date.now() % 60000) / 60000;
+    const isSpike = cycle > 0.8; // Burst variance inside the final 20% array phase
+    const threatProbability = isSpike ? 0.60 : 0.10; // 60% leak clustering during spikes, else 10% background noise
+    
+    const isOriginal = Math.random() > threatProbability; 
     let confidencePercentage = 0;
     
     if (isOriginal) {
-        confidencePercentage = Math.random() * 25 + 60; // 60-85% 
+        confidencePercentage = Math.random() * 25 + 60; // 60-85% map fallback natively
     } else {
-        confidencePercentage = Math.random() * 15 + 85; // 85-100%
+        confidencePercentage = Math.random() * (100 - MATCH_THRESHOLD) + MATCH_THRESHOLD; // Escalate cleanly within logic ceiling
     }
     
-    const scanStatus = confidencePercentage >= 85 ? "unauthorized" : "original";
+    const scanStatus = confidencePercentage >= MATCH_THRESHOLD ? "unauthorized" : "original";
     
     if (scanStatus === 'unauthorized') {
         const existingActiveAlert = alertsDB.find(a => a.matchedMediaId === targetMedia.id && a.status === 'active');
@@ -279,7 +365,6 @@ function runSimulatedScan() {
         status: scanStatus,
         confidence: confidencePercentage,
         platform: platformDetected,
-        thumbnail: null,
         timestamp: new Date().toISOString(),
         matchedMediaId: confidencePercentage > 40 ? targetMedia.id : null
     });
@@ -311,20 +396,198 @@ function toggleSimulation() {
     }
 }
 
+let currentImageProcessingId = 0;
+
 function getImageData(imageSource) {
+    const processId = ++currentImageProcessingId;
     return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 32;
-            canvas.height = 32;
-            ctx.drawImage(img, 0, 0, 32, 32);
-            resolve(ctx.getImageData(0, 0, 32, 32).data);
+        let isDone = false;
+        
+        let timeoutId = setTimeout(() => {
+            if (isDone) return;
+            isDone = true;
+            reject(new Error("Image processing timeout"));
+        }, 4000); // 4 second safety boundary
+        
+        try {
+            const img = new Image();
+            img.onload = async () => {
+                if (isDone) return;
+                clearTimeout(timeoutId);
+                
+                if (processId !== currentImageProcessingId) {
+                    isDone = true;
+                    return reject(new Error("Image processing naturally aborted by overlapping logic."));
+                }
+                
+                if (img.decode) await img.decode();
+                
+                if (isDone) return;
+                
+                let canvas = null, ctx = null;
+                try {
+                    canvas = document.createElement('canvas');
+                    ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    canvas.width = 32;
+                    canvas.height = 32;
+                    ctx.drawImage(img, 0, 0, 32, 32);
+                    const imgData = ctx.getImageData(0, 0, 32, 32).data;
+                    
+                    let sum = 0;
+                    for (let i = 0; i < imgData.length; i++) sum += imgData[i];
+                    if (sum === 0 && !isDone) {
+                        isDone = true;
+                        throw new Error("Extracted imageData is completely empty.");
+                    }
+                    
+                    if (!isDone) {
+                        isDone = true;
+                        resolve(imgData);
+                    }
+                } catch (canvasErr) {
+                    if (!isDone) {
+                        isDone = true;
+                        console.error("Canvas Manipulation Error. Tainting or CORS block intercepted:", canvasErr);
+                        reject(canvasErr);
+                    }
+                } finally {
+                    if (canvas) { canvas.width = 0; canvas.height = 0; }
+                    canvas = null; 
+                    ctx = null;
+                }
+            };
+            img.onerror = (err) => {
+                if (!isDone) {
+                    isDone = true;
+                    clearTimeout(timeoutId);
+                    console.error("Image Processing Error: Failed to successfully append source into Image object.", err);
+                    reject(new Error("Image processing node failure"));
+                }
+            };
+            
+            const srcStr = typeof imageSource === 'string' ? imageSource : imageSource.src;
+            if (!srcStr || srcStr === "") {
+                if (!isDone) {
+                    isDone = true;
+                    throw new Error("Empty image source provided. Aborting array extraction.");
+                }
+            }
+            img.src = srcStr;
+        } catch (error) {
+            if (!isDone) {
+                isDone = true;
+                clearTimeout(timeoutId);
+                console.error("Image DOM setup failed entirely:", error);
+                reject(error);
+            }
+        }
+    });
+}
+
+const workerCode = `
+self.onmessage = function(e) {
+    try {
+        const { id, imgData } = e.data;
+        const N = 32;
+        const gray = new Float32Array(N * N);
+        for (let i = 0; i < imgData.length; i += 4) {
+            gray[i / 4] = 0.299 * imgData[i] + 0.587 * imgData[i+1] + 0.114 * imgData[i+2];
+        }
+        const dct = new Float32Array(64);
+        for (let u = 0; u < 8; u++) {
+            for (let v = 0; v < 8; v++) {
+                let sum = 0;
+                for (let x = 0; x < N; x++) {
+                    for (let y = 0; y < N; y++) {
+                        sum += gray[x * N + y] * Math.cos(((2 * x + 1) * u * Math.PI) / (2 * N)) * Math.cos(((2 * y + 1) * v * Math.PI) / (2 * N));
+                    }
+                }
+                let cu = u === 0 ? 1 / Math.sqrt(2) : 1;
+                let cv = v === 0 ? 1 / Math.sqrt(2) : 1;
+                dct[u * 8 + v] = 0.25 * cu * cv * sum;
+            }
+        }
+        let total = 0;
+        for (let i = 1; i < 64; i++) {
+            total += dct[i];
+        }
+        const mean = total / 63;
+        let hash = "";
+        for (let i = 0; i < 64; i++) {
+            hash += dct[i] > mean ? "1" : "0";
+        }
+        self.postMessage({ id, hash });
+    } catch(err) {
+        self.postMessage({ id: e.data.id, error: err.message });
+    }
+};
+`;
+
+const workerBlob = new Blob([workerCode], { type: "application/javascript" });
+const workerUrl = URL.createObjectURL(workerBlob);
+
+let globalWebWorker = null;
+const workerPromises = new Map();
+let currentWorkerId = 0;
+
+function initWorker() {
+    if (globalWebWorker) return;
+    if (!window.Worker) return;
+    
+    globalWebWorker = new Worker(workerUrl);
+    
+    globalWebWorker.onmessage = (e) => {
+        const { id, hash, error } = e.data;
+        if (workerPromises.has(id)) {
+            const { resolve, reject } = workerPromises.get(id);
+            workerPromises.delete(id);
+            if (error) reject(new Error(error));
+            else resolve(hash);
+        }
+    };
+    
+    globalWebWorker.onerror = (e) => {
+        console.error("Global Web Worker Crash:", e);
+        for (const [id, { reject }] of workerPromises.entries()) {
+            reject(new Error("Mathematical mapping thread execution crashed natively."));
+        }
+        workerPromises.clear();
+        globalWebWorker.terminate();
+        globalWebWorker = null; // Flush for recovery overrides properly.
+    };
+}
+
+function computePHashAsync(imgData) {
+    return new Promise((resolve, reject) => {
+        initWorker();
+        if (!globalWebWorker) {
+            try {
+                resolve(computePHash(imgData)); // Eventual single-thread fallback processing rendering maps naturally
+            } catch (err) {
+                reject(err);
+            }
+            return;
+        }
+        const assignedId = ++currentWorkerId;
+        
+        let timeoutId = setTimeout(() => {
+            if (workerPromises.has(assignedId)) {
+                workerPromises.delete(assignedId);
+                reject(new Error("Worker timeout: hashing failed"));
+            }
+        }, 4000); // 4-second hard processing ceiling 
+
+        const safeResolve = (hashData) => {
+            clearTimeout(timeoutId);
+            resolve(hashData);
         };
-        img.onerror = reject;
-        img.src = typeof imageSource === 'string' ? imageSource : imageSource.src;
+        const safeReject = (errObject) => {
+            clearTimeout(timeoutId);
+            reject(errObject);
+        };
+
+        workerPromises.set(assignedId, { resolve: safeResolve, reject: safeReject });
+        globalWebWorker.postMessage({ id: assignedId, imgData });
     });
 }
 
@@ -370,6 +633,11 @@ function computePHash(imgData) {
 }
 
 function hammingDistance(hash1, hash2) {
+    if (!hash1 || !hash2 || hash1.length !== 64 || hash2.length !== 64) {
+        console.warn(`Hamming validation warning: strict 64-bit bounds violated.`);
+        return 0;
+    }
+    
     let diff = 0;
     for (let i = 0; i < 64; i++) {
         if (hash1[i] !== hash2[i]) diff++;
@@ -452,6 +720,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const targetId = item.getAttribute('data-target');
             const targetPage = document.getElementById(targetId);
             if(targetPage) {
+                // Force DOM reflow to securely restart slideUpFade animations naturally
+                void targetPage.offsetWidth; 
                 targetPage.style.display = 'block';
             }
         });
@@ -463,41 +733,93 @@ document.addEventListener("DOMContentLoaded", () => {
     imageInput.addEventListener("change", function(event) {
         const file = event.target.files[0];
         if (file) {
+            if (!file.type.startsWith("image/")) {
+                uploadText.textContent = "Invalid file type. Image required.";
+                uploadText.style.color = "var(--danger)";
+                setTimeout(() => { uploadText.textContent = "Upload Reference Media"; uploadText.style.color = ""; }, 3000);
+                return;
+            }
+            
             currentFileName = file.name;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                previewSection.style.display = "block";
-                registerButton.disabled = false;
-                uploadText.textContent = file.name;
-                
-                // UX: Disable check button if registry is entirely empty to force workflow
-                if (mediaDB.length === 0) {
-                    checkButton.disabled = true;
-                } else {
-                    checkButton.disabled = false;
-                }
-                
-                resultSection.style.display = "none";
-                resultContent.style.display = "none";
-                resultAlert.className = '';
-                resultTitle.textContent = '';
-                resultSubtext.textContent = '';
-                trackingTimeline.style.display = "none";
-                actionCenter.style.display = "none";
-                if(confidenceBarContainer) confidenceBarContainer.style.display = "none";
-            };
-            reader.readAsDataURL(file);
+            
+            // Secure memory bound overrides dropping persistent string parses naturally!
+            if (imagePreview.src && imagePreview.src.startsWith('blob:')) {
+                URL.revokeObjectURL(imagePreview.src);
+            }
+            
+            const objectUrl = URL.createObjectURL(file);
+            imagePreview.src = objectUrl;
+            
+            previewSection.style.display = "block";
+            registerButton.disabled = false;
+            uploadText.textContent = file.name;
+            
+            // UX: Disable check button if registry is entirely empty to force workflow
+            if (mediaDB.length === 0) {
+                checkButton.disabled = true;
+            } else {
+                checkButton.disabled = false;
+            }
+            
+            resultSection.style.display = "none";
+            resultContent.style.display = "none";
+            resultAlert.className = '';
+            resultTitle.textContent = '';
+            resultSubtext.textContent = '';
+            trackingTimeline.style.display = "none";
+            actionCenter.style.display = "none";
+            if(confidenceBarContainer) confidenceBarContainer.style.display = "none";
+            const exp = document.getElementById("confidenceExplanation");
+            if(exp) exp.style.display = "none";
         }
     });
 
     registerButton.addEventListener("click", async () => {
+        if (mediaDB.length >= 20) {
+            uploadText.textContent = "Storage limit reached (max 20).";
+            uploadText.style.color = "var(--danger)";
+            setTimeout(() => { uploadText.textContent = currentFileName; uploadText.style.color = ""; }, 3000);
+            return;
+        }
+
+        if (isProcessing) {
+            uploadText.textContent = "Processing logic running...";
+            uploadText.style.color = "var(--warning)";
+            setTimeout(() => { uploadText.textContent = currentFileName; uploadText.style.color = ""; }, 2000);
+            return;
+        }
+        if (!currentFileName || !imagePreview.src) {
+            console.warn("Registration rejected: File properties are unbound or empty.");
+            return;
+        }
+        
+        isProcessing = true;
         registerButton.disabled = true;
         checkButton.disabled = true;
         
         try {
+            console.log("Registration process initiated...");
             const rawPixelArray = await getImageData(imagePreview.src);
-            const phashStr = computePHash(rawPixelArray); 
+            const phashStr = await computePHashAsync(rawPixelArray); // Deep WebWorker isolation
+            console.log(`Generated structural pHash: ${phashStr}`);
+            
+            if (!phashStr) throw new Error("Hash generation fatally bugged. Output is completely empty.");
+            
+            const exists = mediaDB.find(m => m.phash === phashStr);
+            if (exists) {
+                console.warn("Duplicate registration prevented: Image pHash already exists.");
+                registerFeedback.textContent = "Media is already registered in the official database.";
+                registerFeedback.style.color = "var(--warning)";
+                registerFeedback.style.display = "block";
+                setTimeout(() => {
+                    registerFeedback.style.display = "none";
+                    registerFeedback.style.color = "var(--success)";
+                }, 3000);
+                
+                registerButton.disabled = false;
+                checkButton.disabled = false;
+                return;
+            }
             
             const newMedia = {
                 id: generateId(),
@@ -511,7 +833,6 @@ document.addEventListener("DOMContentLoaded", () => {
             saveState();
             renderDashboard();
             
-            // We can now safely allow checking since media isn't 0
             checkButton.disabled = false;
             
             registerFeedback.textContent = "Media successfully registered as official content";
@@ -521,10 +842,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 registerFeedback.style.display = "none";
             }, 3000);
         } catch(e) {
-            console.error(e);
-            alert("Failed to register media.");
+            console.error("Critical Registration Pipeline Error:", e);
         } finally {
             registerButton.disabled = false;
+            isProcessing = false;
         }
     });
 
@@ -541,43 +862,99 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle "Check Authenticity" Button Click
     checkButton.addEventListener("click", async () => {
+        if (isProcessing) {
+            uploadText.textContent = "Processing logic running...";
+            uploadText.style.color = "var(--warning)";
+            setTimeout(() => { uploadText.textContent = currentFileName; uploadText.style.color = ""; }, 2000);
+            return;
+        }
+        isProcessing = true;
         checkButton.disabled = true;
         
         resultSection.style.display = "block";
         loader.style.display = "block";
         statusMessage.style.display = "block";
+        statusMessage.style.color = ""; // reset fallback text color
         resultContent.style.display = "none";
+        
+        const uploadSection = document.querySelector('.upload-section');
+        
+        // Unhide bounds ensuring components render accurately regardless of matching map hits
+        confidenceScoreNode.style.display = "block";
+        if (confidenceBarContainer) confidenceBarContainer.style.display = "block";
+        scoreValue.textContent = "0.0%";
+        if (confidenceBarFill) {
+            confidenceBarFill.style.transition = 'none'; // halt active layout glides 
+            confidenceBarFill.style.width = "0%";
+            confidenceBarFill.style.backgroundColor = "var(--success)";
+            
+            void confidenceBarFill.offsetWidth; // direct layout redraw
+            
+            confidenceBarFill.style.transition = 'width 1.2s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.5s ease';
+        }
 
         try {
-            if (mediaDB.length === 0) { // Safety check
-                resultSection.style.display = "none"; 
+            if (mediaDB.length === 0) { 
+                console.warn("Scan Warning: mediaDB array is empty. Stop execution.");
+                resultSection.style.display = "none";
+                statusMessage.style.display = "block";
+                statusMessage.textContent = "No registered media found. Please register first.";
+                statusMessage.style.color = "var(--warning)";
+                checkButton.disabled = false;
                 return;
             }
-            confidenceScoreNode.style.display = "block";
-            if(confidenceBarContainer) confidenceBarContainer.style.display = "block";
+            if (!imagePreview.src || imagePreview.src === "") {
+                throw new Error("Target Source failure. Object is completely devoid of string mapping.");
+            }
+            
+            uploadSection.classList.add('is-scanning');
+            console.log("Scanner loop engine engaged...");
 
             statusMessage.textContent = "Scanning media database...";
             await sleep(600);
             
             statusMessage.textContent = "Analyzing visual fingerprint...";
+            console.log("Attempting to parse target pixel layout constraints...");
             const rawUploaded = await getImageData(imagePreview.src);
-            const uploadedHash = computePHash(rawUploaded);
+            const uploadedHash = await computePHashAsync(rawUploaded); // WebWorker thread shift
+            console.log(`Target object calculated pHash successfully: ${uploadedHash}`);
             await sleep(600);
             
             statusMessage.textContent = "Matching against known content...";
             let maxSimilarity = 0;
             let matchedMediaId = null;
             
-            // Compare uploaded image against all registered media
-            for (const media of mediaDB) {
-                if (!media.phash) continue; // Safe fallback skipping legacy payload bodies
+            console.log("Engaging Hamming verification against local DB strings...");
+            
+            // Loop tracking
+            for (let i = 0; i < mediaDB.length; i++) {
+                const media = mediaDB[i];
+                if (!media.phash) {
+                    console.warn(`Object bounds check failed [${media.name}] -- missing native hashing element.`);
+                    continue; 
+                }
+                
+                if (i > 0 && i % 50 === 0) await sleep(20); // Artificial logic batch simulation spacing loops
                 
                 const similarity = hammingDistance(uploadedHash, media.phash);
+                console.log(`Analyzing hit bound [${media.name}]: similarity -> ${similarity.toFixed(2)}%`);
                 if (similarity > maxSimilarity) {
                     maxSimilarity = similarity;
                     matchedMediaId = media.id;
                 }
+                
+                if (maxSimilarity >= MATCH_THRESHOLD) { // Mathematical early exit optimization limit loop!
+                    console.log(`Strict early exit optimization boundary. ${MATCH_THRESHOLD}% safe hit matched!`);
+                    break;
+                }
             }
+            console.log(`Peak hit acquired: ${maxSimilarity.toFixed(2)}% mapping target origin ID -> ${matchedMediaId}`);
+            
+            console.log({
+                similarity: maxSimilarity,
+                status: maxSimilarity >= MATCH_THRESHOLD ? "UNAUTHORIZED" : "ORIGINAL",
+                matchedMediaId
+            });
             
             await sleep(800);
             
@@ -593,14 +970,41 @@ document.addEventListener("DOMContentLoaded", () => {
                 confidenceBarFill.style.width = Math.min(100, confidencePercentage).toFixed(1) + "%";
                 if (confidencePercentage < 70) {
                     confidenceBarFill.style.backgroundColor = "var(--success)";
-                } else if (confidencePercentage < 85) {
+                } else if (confidencePercentage < MATCH_THRESHOLD) {
                     confidenceBarFill.style.backgroundColor = "var(--warning)";
                 } else {
                     confidenceBarFill.style.backgroundColor = "var(--danger)";
                 }
             }
             
-            if (maxSimilarity >= 85) {
+            const confidenceExplanation = document.getElementById("confidenceExplanation");
+            if (confidenceExplanation) {
+                confidenceExplanation.style.display = "block";
+                let similarityText = "";
+                if (confidencePercentage < 50) {
+                    similarityText = `<strong><span style="color:var(--success);"><i class="fa-solid fa-check-circle"></i> Low similarity:</span></strong> no structural match`;
+                } else if (confidencePercentage < MATCH_THRESHOLD) {
+                    similarityText = `<strong><span style="color:var(--warning);"><i class="fa-solid fa-triangle-exclamation"></i> Partial similarity:</span></strong> some features match`;
+                } else {
+                    similarityText = `<strong><span style="color:var(--danger);"><i class="fa-solid fa-shield-halved"></i> High similarity:</span></strong> strong structural match detected`;
+                }
+                
+                let matchDetailsText = "";
+                if (matchedMediaId) {
+                    const matchedMediaObj = mediaDB.find(m => m.id === matchedMediaId);
+                    if (matchedMediaObj) {
+                         matchDetailsText = `<br><span style="font-size: 12px; opacity: 0.8; margin-top: 6px; display: inline-block;"><i class="fa-solid fa-link"></i> Matched with: ${matchedMediaObj.name} (ID: ${matchedMediaId})</span>`;
+                    } else {
+                         matchDetailsText = `<br><span style="font-size: 12px; opacity: 0.8; margin-top: 6px; display: inline-block;"><i class="fa-solid fa-link"></i> Matched with: Unknown Reference (ID: ${matchedMediaId})</span>`;
+                    }
+                } else {
+                    matchDetailsText = `<br><span style="font-size: 12px; opacity: 0.8; margin-top: 6px; display: inline-block;"><i class="fa-solid fa-link-slash"></i> No internal reference matches found.</span>`;
+                }
+                
+                confidenceExplanation.innerHTML = similarityText + matchDetailsText;
+            }
+            
+            if (maxSimilarity >= MATCH_THRESHOLD) {
                 scanStatus = "unauthorized";
                 const platforms = ["Sports News Platform", "Social Media", "Streaming Platform"];
                 platformDetected = platforms[Math.floor(Math.random() * platforms.length)];
@@ -659,6 +1063,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 actionCenter.style.display = "none";
             }
             
+            uploadSection.classList.remove('is-scanning'); // End visuals
+            
             monitoringDB.push({
                 id: generateId(),
                 status: scanStatus,
@@ -676,15 +1082,19 @@ document.addEventListener("DOMContentLoaded", () => {
             renderAlerts();
 
             scoreValue.textContent = maxSimilarity.toFixed(1) + "%";
-            
             checkButton.disabled = false;
 
         } catch (error) {
-            console.error("Error computing image similarity:", error);
+            console.error("Application Process Interruption: Matching algorithm engine failure hook:", error);
             loader.style.display = "none";
-            statusMessage.style.display = "none";
+            statusMessage.style.display = "block";
+            statusMessage.textContent = "Matrix Processing Failed. Logs recorded into debug terminal.";
+            statusMessage.style.color = "var(--danger)";
+            
+            if (uploadSection) uploadSection.classList.remove('is-scanning');
             checkButton.disabled = false;
-            alert("Error processing images. Please try again.");
+        } finally {
+            isProcessing = false;
         }
     });
 });
