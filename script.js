@@ -24,27 +24,59 @@ function cleanLegacyData(arr) {
     });
 }
 
-function loadState() {
-    try {
-        const savedMedia = localStorage.getItem('mediaDB');
-        if (savedMedia) mediaDB = cleanLegacyData(JSON.parse(savedMedia));
-    } catch(e) { console.warn("mediaDB corruption detected. Resetting."); localStorage.removeItem('mediaDB'); mediaDB = []; }
-    
-    try {
-        const savedMonitoring = localStorage.getItem('monitoringDB');
-        if (savedMonitoring) monitoringDB = cleanLegacyData(JSON.parse(savedMonitoring));
-    } catch(e) { console.warn("monitoringDB corruption detected. Resetting."); localStorage.removeItem('monitoringDB'); monitoringDB = []; }
-    
-    try {
-        const savedAlerts = localStorage.getItem('alertsDB');
-        if (savedAlerts) alertsDB = cleanLegacyData(JSON.parse(savedAlerts));
-    } catch(e) { console.warn("alertsDB corruption detected. Resetting."); localStorage.removeItem('alertsDB'); alertsDB = []; }
+// ─────────────────────────────────────────────────────────────
+// API CONFIG
+// Change this string for deployment (e.g. https://your-app.railway.app)
+// ─────────────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:3000';
+
+// ─────────────────────────────────────────────────────────────
+// apiRequest — centralized fetch utility
+// All API calls go through this function.
+// Handles headers, JSON parsing, and error surfacing.
+// ─────────────────────────────────────────────────────────────
+async function apiRequest(endpoint, method = 'GET', body = null) {
+    const options = {
+        method,
+        headers: { 'Content-Type': 'application/json' }
+    };
+    if (body) options.body = JSON.stringify(body);
+
+    const res  = await fetch(`${API_BASE}/api${endpoint}`, options);
+    const json = await res.json();
+
+    // Backend always returns { success, data } or { success, error }
+    if (!json.success && res.status !== 409 && res.status !== 404) {
+        throw new Error(json.error || `API error ${res.status}`);
+    }
+    return { status: res.status, ok: res.ok, ...json }; // spread so callers get .data and .error directly
 }
 
+// Fetch all state from the backend on page load
+async function loadState() {
+    try {
+        const [mediaRes, monRes, alertRes] = await Promise.all([
+            apiRequest('/media'),
+            apiRequest('/monitoring'),
+            apiRequest('/alerts')
+        ]);
+        if (mediaRes.data)  mediaDB      = cleanLegacyData(mediaRes.data);
+        if (monRes.data)    monitoringDB = cleanLegacyData(monRes.data);
+        if (alertRes.data)  alertsDB     = cleanLegacyData(alertRes.data);
+        console.log('[loadState] State loaded from backend.');
+        
+        // Ensure UI is re-rendered using Server Data Only
+        renderDashboard();
+        renderMonitoring();
+        renderAlerts();
+    } catch (e) {
+        console.warn('[loadState] Backend unreachable — running in offline mode.', e.message);
+    }
+}
+
+// saveState() is a no-op — each action persists via its own apiRequest() call
 function saveState() {
-    localStorage.setItem('mediaDB', JSON.stringify(mediaDB));
-    localStorage.setItem('monitoringDB', JSON.stringify(monitoringDB));
-    localStorage.setItem('alertsDB', JSON.stringify(alertsDB));
+    // Intentionally empty
 }
 
 function getPlatformIcon(platform) {
@@ -255,13 +287,21 @@ function renderMonitoring() {
 }
 
 window.resolveAlert = function(id) {
-    const alert = alertsDB.find(a => a.id === id);
-    if (alert) {
-        alert.status = 'resolved';
-        saveState();
-        renderAlerts();
-        renderDashboard();
-    }
+    apiRequest(`/alerts/${id}/resolve`, 'PATCH')
+        .then(response => {
+            if (response.success && response.data) {
+                // Update local state directly from backend confirmation
+                const idx = alertsDB.findIndex(a => a.id === id);
+                if (idx !== -1) {
+                    alertsDB[idx] = response.data;
+                    renderAlerts();
+                    renderDashboard();
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Failed to resolve alert:', err);
+        });
 }
 
 function renderAlerts() {
@@ -348,33 +388,25 @@ function runSimulatedScan() {
     if (scanStatus === 'unauthorized') {
         const existingActiveAlert = alertsDB.find(a => a.matchedMediaId === targetMedia.id && a.status === 'active');
         if (!existingActiveAlert) {
-            alertsDB.push({
-                id: generateId(),
+            apiRequest('/alerts', 'POST', {
                 status: "active",
                 confidence: confidencePercentage,
                 platform: platformDetected,
                 timestamp: new Date().toISOString(),
                 matchedMediaId: targetMedia.id
-            });
-            if (alertsDB.length > 50) alertsDB.shift(); // Bounds constraint
+            }).catch(e => console.warn('[alerts] Simulation save failed:', e.message));
         }
     }
     
-    monitoringDB.push({
-        id: generateId(),
+    apiRequest('/monitoring', 'POST', {
         status: scanStatus,
         confidence: confidencePercentage,
         platform: platformDetected,
         timestamp: new Date().toISOString(),
         matchedMediaId: confidencePercentage > 40 ? targetMedia.id : null
-    });
-    
-    if (monitoringDB.length > 100) monitoringDB.shift(); // Bounds constraint
-    
-    saveState();
-    renderDashboard();
-    renderMonitoring();
-    renderAlerts();
+    })
+    .then(() => loadState()) // Sync all clients and UI state cleanly
+    .catch(e => console.warn('[monitoring] Simulation save failed:', e.message));
 }
 
 function toggleSimulation() {
@@ -648,9 +680,9 @@ function hammingDistance(hash1, hash2) {
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Initial loads
-    loadState();
+document.addEventListener("DOMContentLoaded", async () => {
+    // Load all data from backend before rendering
+    await loadState();
     renderDashboard();
     renderMonitoring();
     renderAlerts();
@@ -798,49 +830,49 @@ document.addEventListener("DOMContentLoaded", () => {
         checkButton.disabled = true;
         
         try {
-            console.log("Registration process initiated...");
+            console.log('[register] Computing pHash...');
             const rawPixelArray = await getImageData(imagePreview.src);
-            const phashStr = await computePHashAsync(rawPixelArray); // Deep WebWorker isolation
-            console.log(`Generated structural pHash: ${phashStr}`);
+            const phashStr = await computePHashAsync(rawPixelArray);
+
+            if (!phashStr) throw new Error('Hash generation failed. Output is empty.');
             
-            if (!phashStr) throw new Error("Hash generation fatally bugged. Output is completely empty.");
+            console.log('[register] POSTing to /api/media/register...');
+            let result;
+            try {
+                result = await apiRequest('/media/register', 'POST', {
+                    name: currentFileName,
+                    phash: phashStr,
+                    type: 'image'
+                });
+            } catch (apiErr) {
+                // Show user-friendly error
+                registerFeedback.textContent = `Server error: ${apiErr.message}`;
+                registerFeedback.style.color = 'var(--danger)';
+                registerFeedback.style.display = 'block';
+                setTimeout(() => { registerFeedback.style.display = 'none'; registerFeedback.style.color = 'var(--success)'; }, 3500);
+                return;
+            }
             
-            const exists = mediaDB.find(m => m.phash === phashStr);
-            if (exists) {
-                console.warn("Duplicate registration prevented: Image pHash already exists.");
-                registerFeedback.textContent = "Media is already registered in the official database.";
-                registerFeedback.style.color = "var(--warning)";
-                registerFeedback.style.display = "block";
-                setTimeout(() => {
-                    registerFeedback.style.display = "none";
-                    registerFeedback.style.color = "var(--success)";
-                }, 3000);
-                
+            if (result.status === 409) {
+                console.warn('[register] Duplicate blocked by backend.');
+                registerFeedback.textContent = 'Media is already registered in the official database.';
+                registerFeedback.style.color = 'var(--warning)';
+                registerFeedback.style.display = 'block';
+                setTimeout(() => { registerFeedback.style.display = 'none'; registerFeedback.style.color = 'var(--success)'; }, 3000);
                 registerButton.disabled = false;
                 checkButton.disabled = false;
                 return;
             }
-            
-            const newMedia = {
-                id: generateId(),
-                phash: phashStr,
-                type: "image",
-                name: currentFileName,
-                uploadedAt: new Date().toISOString()
-            };
-            
-            mediaDB.push(newMedia);
-            saveState();
+
+            // Update in-memory array from backend response
+            mediaDB.push(result.data);
             renderDashboard();
-            
+
             checkButton.disabled = false;
-            
-            registerFeedback.textContent = "Media successfully registered as official content";
-            registerFeedback.style.display = "block";
-            
-            setTimeout(() => {
-                registerFeedback.style.display = "none";
-            }, 3000);
+            registerFeedback.textContent = 'Media successfully registered as official content';
+            registerFeedback.style.display = 'block';
+            setTimeout(() => { registerFeedback.style.display = 'none'; }, 3000);
+            console.log('[register] Success:', result.data.id);
         } catch(e) {
             console.error("Critical Registration Pipeline Error:", e);
         } finally {
@@ -913,48 +945,26 @@ document.addEventListener("DOMContentLoaded", () => {
             statusMessage.textContent = "Scanning media database...";
             await sleep(600);
             
-            statusMessage.textContent = "Analyzing visual fingerprint...";
-            console.log("Attempting to parse target pixel layout constraints...");
+            statusMessage.textContent = 'Analyzing visual fingerprint...';
+            console.log('[check] Computing pHash...');
             const rawUploaded = await getImageData(imagePreview.src);
-            const uploadedHash = await computePHashAsync(rawUploaded); // WebWorker thread shift
-            console.log(`Target object calculated pHash successfully: ${uploadedHash}`);
+            const uploadedHash = await computePHashAsync(rawUploaded);
+            console.log('[check] pHash ready. Sending to /api/check...');
             await sleep(600);
             
-            statusMessage.textContent = "Matching against known content...";
-            let maxSimilarity = 0;
-            let matchedMediaId = null;
-            
-            console.log("Engaging Hamming verification against local DB strings...");
-            
-            // Loop tracking
-            for (let i = 0; i < mediaDB.length; i++) {
-                const media = mediaDB[i];
-                if (!media.phash) {
-                    console.warn(`Object bounds check failed [${media.name}] -- missing native hashing element.`);
-                    continue; 
-                }
-                
-                if (i > 0 && i % 50 === 0) await sleep(20); // Artificial logic batch simulation spacing loops
-                
-                const similarity = hammingDistance(uploadedHash, media.phash);
-                console.log(`Analyzing hit bound [${media.name}]: similarity -> ${similarity.toFixed(2)}%`);
-                if (similarity > maxSimilarity) {
-                    maxSimilarity = similarity;
-                    matchedMediaId = media.id;
-                }
-                
-                if (maxSimilarity >= MATCH_THRESHOLD) { // Mathematical early exit optimization limit loop!
-                    console.log(`Strict early exit optimization boundary. ${MATCH_THRESHOLD}% safe hit matched!`);
-                    break;
-                }
+            statusMessage.textContent = 'Matching against known content...';
+
+            let checkData;
+            try {
+                const result = await apiRequest('/check', 'POST', { phash: uploadedHash });
+                checkData = result.data;
+            } catch (apiErr) {
+                throw new Error(`Check request failed: ${apiErr.message}`);
             }
-            console.log(`Peak hit acquired: ${maxSimilarity.toFixed(2)}% mapping target origin ID -> ${matchedMediaId}`);
-            
-            console.log({
-                similarity: maxSimilarity,
-                status: maxSimilarity >= MATCH_THRESHOLD ? "UNAUTHORIZED" : "ORIGINAL",
-                matchedMediaId
-            });
+
+            const maxSimilarity  = checkData.similarity  || 0;
+            const matchedMediaId = checkData.matchedMediaId || null;
+            console.log('[check] Backend result:', checkData);
             
             await sleep(800);
             
@@ -964,7 +974,16 @@ document.addEventListener("DOMContentLoaded", () => {
             
             let scanStatus = "original";
             let platformDetected = "Internal Processing";
-            const confidencePercentage = maxSimilarity;
+            
+            // --- Confidence Realism Intercept ---
+            // Rule: Cap values >= 99 to look realistic (97.0 - 99.5), removing 100% display
+            let displaySimilarity = maxSimilarity;
+            if (displaySimilarity >= 99) {
+                // Deterministic mapping: stable across reloads, maps 100% to ~98.7%
+                displaySimilarity = 97.1 + (maxSimilarity % 2.4);
+            }
+            
+            const confidencePercentage = displaySimilarity;
             
             if (confidenceBarFill) {
                 confidenceBarFill.style.width = Math.min(100, confidencePercentage).toFixed(1) + "%";
@@ -985,8 +1004,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     similarityText = `<strong><span style="color:var(--success);"><i class="fa-solid fa-check-circle"></i> Low similarity:</span></strong> no structural match`;
                 } else if (confidencePercentage < MATCH_THRESHOLD) {
                     similarityText = `<strong><span style="color:var(--warning);"><i class="fa-solid fa-triangle-exclamation"></i> Partial similarity:</span></strong> some features match`;
+                } else if (confidencePercentage >= 98) {
+                    similarityText = `<strong><span style="color:var(--danger);"><i class="fa-solid fa-shield-halved"></i> Near-identical match:</span></strong> This media matches a registered asset with extremely high structural similarity based on perceptual hashing.`;
                 } else {
-                    similarityText = `<strong><span style="color:var(--danger);"><i class="fa-solid fa-shield-halved"></i> High similarity:</span></strong> strong structural match detected`;
+                    similarityText = `<strong><span style="color:var(--danger);"><i class="fa-solid fa-shield-halved"></i> High similarity:</span></strong> This media matches a registered asset with high structural similarity based on perceptual hashing.`;
                 }
                 
                 let matchDetailsText = "";
@@ -1002,6 +1023,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 
                 confidenceExplanation.innerHTML = similarityText + matchDetailsText;
+            }
+
+            // Visual Comparison Update
+            const visualComparisonBlock = document.getElementById("visualComparisonBlock");
+            if (visualComparisonBlock) {
+                document.getElementById("matchSimilarityValue").textContent = displaySimilarity.toFixed(1) + "%";
+                let matchLevel = "LOW";
+                if (displaySimilarity >= 98) matchLevel = "NEAR IDENTICAL";
+                else if (displaySimilarity >= 90) matchLevel = "HIGH";
+                else if (displaySimilarity >= 75) matchLevel = "MODERATE";
+                
+                const matchLevelLabel = document.getElementById("matchLevelLabel");
+                matchLevelLabel.textContent = matchLevel;
+                if (matchLevel === "HIGH" || matchLevel === "NEAR IDENTICAL") matchLevelLabel.className = "badge badge-danger";
+                else if (matchLevel === "MODERATE") matchLevelLabel.className = "badge badge-warning";
+                else matchLevelLabel.className = "badge badge-success";
+
+                if (matchedMediaId && maxSimilarity >= MATCH_THRESHOLD) {
+                    const matchedMediaObj = mediaDB.find(m => m.id === matchedMediaId);
+                    if (matchedMediaObj) {
+                        visualComparisonBlock.style.display = "block";
+                        await generateDiffMap(imagePreview.src, '/' + matchedMediaObj.name);
+                    } else {
+                        visualComparisonBlock.style.display = "none";
+                    }
+                } else {
+                    visualComparisonBlock.style.display = "none";
+                }
             }
             
             if (maxSimilarity >= MATCH_THRESHOLD) {
@@ -1040,18 +1089,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 trackingTimeline.style.display = "block";
                 actionCenter.style.display = "block";
                 
-                // DE-DUPLICATION CHECK
+                // Persist alert to backend (in-memory dedup check first)
                 const existingActiveAlert = alertsDB.find(a => a.matchedMediaId === matchedMediaId && a.status === 'active');
                 if (!existingActiveAlert) {
-                    alertsDB.push({
-                        id: generateId(),
-                        status: "active",
+                    const alertEntry = {
+                        status: 'active',
                         confidence: confidencePercentage,
                         platform: platformDetected,
                         timestamp: new Date().toISOString(),
-                        matchedMediaId: matchedMediaId
-                    });
-                    if (alertsDB.length > 50) alertsDB.shift();
+                        matchedMediaId
+                    };
+                    apiRequest('/alerts', 'POST', alertEntry)
+                        .then(r => {
+                            if (r.data) {
+                                alertsDB.push(r.data);
+                                if (alertsDB.length > 50) alertsDB.shift();
+                            }
+                        })
+                        .catch(e => console.warn('[alerts] Save failed:', e.message));
                 }
                 
             } else {
@@ -1063,25 +1118,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 actionCenter.style.display = "none";
             }
             
-            uploadSection.classList.remove('is-scanning'); // End visuals
+            uploadSection.classList.remove('is-scanning');
             
-            monitoringDB.push({
-                id: generateId(),
+            // Persist monitoring entry to backend
+            const monEntry = {
                 status: scanStatus,
                 confidence: confidencePercentage,
                 platform: platformDetected,
-                thumbnail: imagePreview.src,
                 timestamp: new Date().toISOString(),
-                matchedMediaId: matchedMediaId // Relational link injected here!
-            });
-            if (monitoringDB.length > 100) monitoringDB.shift();
+                matchedMediaId
+            };
+            apiRequest('/monitoring', 'POST', monEntry)
+                .then(r => {
+                    if (r.data) {
+                        monitoringDB.push(r.data);
+                        if (monitoringDB.length > 100) monitoringDB.shift();
+                    }
+                    renderMonitoring();
+                })
+                .catch(e => console.warn('[monitoring] Save failed:', e.message));
 
-            saveState();
+            // Persist to backend then re-render
             renderDashboard();
-            renderMonitoring();
             renderAlerts();
 
-            scoreValue.textContent = maxSimilarity.toFixed(1) + "%";
+            scoreValue.textContent = displaySimilarity.toFixed(1) + "%";
             checkButton.disabled = false;
 
         } catch (error) {
@@ -1098,3 +1159,168 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+// --- Dataset-Driven Simulation Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    const runSimulationBtn = document.getElementById('runSimulationBtn');
+    const simulationFeedback = document.getElementById('simulationFeedback');
+
+    if (runSimulationBtn) {
+        runSimulationBtn.addEventListener('click', async () => {
+            runSimulationBtn.disabled = true;
+            const originalText = runSimulationBtn.innerHTML;
+            runSimulationBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running...';
+            simulationFeedback.style.display = 'none';
+
+            try {
+                const response = await apiRequest('/monitoring/simulate', 'POST');
+                if (response && response.success) {
+                    // Reload all data from backend to ensure synchronization
+                    await loadState();
+                    
+                    // Show success feedback
+                    simulationFeedback.textContent = "Simulation completed successfully";
+                    simulationFeedback.style.color = "var(--success)";
+                    simulationFeedback.style.display = 'inline-block';
+                    
+                    // Hide feedback after 4 seconds
+                    setTimeout(() => {
+                        simulationFeedback.style.display = 'none';
+                    }, 4000);
+                }
+            } catch (error) {
+                console.error("Simulation trigger failed:", error);
+                simulationFeedback.textContent = "Simulation failed: " + error.message;
+                simulationFeedback.style.color = "var(--danger)";
+                simulationFeedback.style.display = 'inline-block';
+            } finally {
+                runSimulationBtn.disabled = false;
+                runSimulationBtn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Toggle Diff View Button Logic
+    const toggleDiffBtn = document.getElementById('toggleDiffBtn');
+    const differenceContainer = document.getElementById('differenceContainer');
+    if (toggleDiffBtn && differenceContainer) {
+        toggleDiffBtn.innerHTML = '<i class="fa-solid fa-eye"></i> Show Difference View';
+        toggleDiffBtn.addEventListener('click', () => {
+            if (differenceContainer.style.display === 'none') {
+                differenceContainer.style.display = 'flex';
+                // Trigger reflow for fade-in transition
+                void differenceContainer.offsetWidth;
+                differenceContainer.style.opacity = '1';
+                toggleDiffBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Hide Difference View';
+            } else {
+                differenceContainer.style.opacity = '0';
+                setTimeout(() => {
+                    differenceContainer.style.display = 'none';
+                }, 300);
+                toggleDiffBtn.innerHTML = '<i class="fa-solid fa-eye"></i> Show Difference View';
+            }
+        });
+    }
+});
+
+// --- Difference Canvas Generation Logic ---
+async function generateDiffMap(uploadedSrc, referenceSrc) {
+    const uploadedCanvas = document.getElementById('uploadedCanvas');
+    const referenceCanvas = document.getElementById('referenceCanvas');
+    const differenceCanvas = document.getElementById('differenceCanvas');
+    
+    // Downscale bound as per requirements
+    const targetSize = 300;
+    
+    function drawToCanvas(src, canvas) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                // Maintain aspect ratio, fit inside box
+                const scale = Math.min(targetSize / img.width, targetSize / img.height);
+                const w = img.width * scale;
+                const h = img.height * scale;
+                const x = (targetSize - w) / 2;
+                const y = (targetSize - h) / 2;
+                
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, targetSize, targetSize);
+                ctx.drawImage(img, x, y, w, h);
+                resolve(ctx.getImageData(0, 0, targetSize, targetSize));
+            };
+            img.onerror = (err) => {
+                console.error("Failed to load reference image:", img.src);
+                reject(new Error("Failed to load image"));
+            };
+            img.src = src;
+        });
+    }
+    
+    try {
+        const [uploadedData, referenceData] = await Promise.all([
+            drawToCanvas(uploadedSrc, uploadedCanvas),
+            drawToCanvas(referenceSrc, referenceCanvas)
+        ]);
+        
+        const diffCtx = differenceCanvas.getContext('2d');
+        const diffImgData = diffCtx.createImageData(targetSize, targetSize);
+        const d1 = uploadedData.data;
+        const d2 = referenceData.data;
+        const out = diffImgData.data;
+        
+        const THRESHOLD = 50;
+        let hasDifference = false;
+        
+        for (let i = 0; i < d1.length; i += 4) {
+            const r1 = d1[i], g1 = d1[i+1], b1 = d1[i+2];
+            const r2 = d2[i], g2 = d2[i+1], b2 = d2[i+2];
+            
+            // Skip padding area to keep it black
+            if (r1===0 && g1===0 && b1===0 && r2===0 && g2===0 && b2===0) {
+                out[i] = out[i+1] = out[i+2] = 0;
+                out[i+3] = 255;
+                continue;
+            }
+            
+            const diff = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+            
+            if (diff < THRESHOLD) {
+                // Pixel is considered similar -> fully transparent
+                out[i] = out[i+1] = out[i+2] = out[i+3] = 0; 
+            } else {
+                // Pixel is different -> highlight red with strong intensity
+                hasDifference = true;
+                const intensity = Math.min(diff / 255, 1);
+                out[i] = 255;
+                out[i+1] = 0;
+                out[i+2] = 0;
+                out[i+3] = Math.max(intensity * 255, 120);
+            }
+        }
+        
+        if (hasDifference) {
+            diffCtx.putImageData(diffImgData, 0, 0);
+        } else {
+            // Edge case: Images are exactly identical in bounds
+            diffCtx.fillStyle = '#111';
+            diffCtx.fillRect(0, 0, targetSize, targetSize);
+            diffCtx.fillStyle = '#ccc';
+            diffCtx.font = '500 13px system-ui, -apple-system, sans-serif';
+            diffCtx.textAlign = 'center';
+            diffCtx.fillText('No structural differences detected', targetSize / 2, targetSize / 2);
+        }
+    } catch (err) {
+        console.error("Error generating difference map:", err);
+        
+        // Fallback: Show error message on the difference canvas instead of breaking silently
+        const diffCtx = differenceCanvas.getContext('2d');
+        diffCtx.fillStyle = '#0f172a'; // dark background
+        diffCtx.fillRect(0, 0, targetSize, targetSize);
+        diffCtx.fillStyle = '#ef4444'; // danger red
+        diffCtx.font = '500 13px system-ui, -apple-system, sans-serif';
+        diffCtx.textAlign = 'center';
+        diffCtx.fillText('Reference image failed to load', targetSize / 2, targetSize / 2);
+    }
+}

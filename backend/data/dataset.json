@@ -1,0 +1,38 @@
+{
+  "originals": [
+    {
+      "id": "orig_001",
+      "name": "championship_final_goal.jpg"
+    },
+    {
+      "id": "orig_002",
+      "name": "exclusive_interview_frame.png"
+    },
+    {
+      "id": "orig_003",
+      "name": "official_team_roster.jpg"
+    }
+  ],
+  "variations": [
+    {
+      "id": "var_001",
+      "sourceId": "orig_001",
+      "type": "resized"
+    },
+    {
+      "id": "var_002",
+      "sourceId": "orig_001",
+      "type": "watermarked"
+    },
+    {
+      "id": "var_003",
+      "sourceId": "orig_002",
+      "type": "cropped"
+    },
+    {
+      "id": "var_004",
+      "sourceId": "orig_003",
+      "type": "compressed"
+    }
+  ]
+}

@@ -190,6 +190,31 @@
                                 </div>
                                 <div id="sourceLabels" class="source-labels" style="display: none;"></div>
                                 
+                                <div id="visualComparisonBlock" class="visual-comparison-block" style="display: none; margin-top: 24px; margin-bottom: 24px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 16px; background: rgba(0,0,0,0.03); border-radius: 8px;">
+                                        <div style="font-weight: 600; color: var(--text-muted);">Match Level: <span id="matchLevelLabel" class="badge"></span></div>
+                                        <div style="font-size: 16px; font-weight: 600;">Match Confidence: <span id="matchSimilarityValue" style="font-size: 20px; font-weight: 700;"></span></div>
+                                    </div>
+                                    <div class="comparison-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start;">
+                                        <div class="comparison-item" style="display: flex; flex-direction: column; align-items: center;">
+                                            <span class="comparison-label" style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Uploaded</span>
+                                            <canvas id="uploadedCanvas" class="diff-canvas" width="300" height="300" style="width: 100%; max-width: 300px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>
+                                        </div>
+                                        <div class="comparison-item" style="display: flex; flex-direction: column; align-items: center;">
+                                            <span class="comparison-label" style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Reference</span>
+                                            <canvas id="referenceCanvas" class="diff-canvas" width="300" height="300" style="width: 100%; max-width: 300px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>
+                                        </div>
+                                        <div class="comparison-item" id="differenceContainer" style="display: none; flex-direction: column; align-items: center; transition: opacity 0.3s ease; opacity: 0;">
+                                            <span class="comparison-label" style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">Difference</span>
+                                            <canvas id="differenceCanvas" class="diff-canvas" width="300" height="300" style="width: 100%; max-width: 300px; border-radius: 6px; box-shadow: 0 0 12px rgba(239,68,68,0.3); border: 2px solid rgba(239,68,68,0.5);"></canvas>
+                                            <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center; max-width: 250px; line-height: 1.4;">Red areas indicate structural differences between the uploaded and reference images.</p>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: center; margin-top: 24px;">
+                                        <button id="toggleDiffBtn" class="action-btn sm-btn secondary-btn" type="button"><i class="fa-solid fa-eye"></i> Show Difference View</button>
+                                    </div>
+                                </div>
+                                
                                 <div class="confidence-score">
                                     <span>Match Confidence:</span>
                                     <span id="scoreValue"></span>
@@ -234,6 +259,10 @@
                             <button class="filter-btn" data-filter="unauthorized">Unauthorized</button>
                             <button class="filter-btn" data-filter="original">Original</button>
                         </div>
+                    </div>
+                    <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                        <button id="runSimulationBtn" class="action-btn primary-btn"><i class="fa-solid fa-play"></i> Run Detection Simulation</button>
+                        <span id="simulationFeedback" style="color: var(--success); font-weight: 500; font-size: 14px; display: none;"></span>
                     </div>
                     <div class="panel table-panel">
                         <table class="data-table">

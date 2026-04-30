@@ -1,0 +1,402 @@
+[
+  {
+    "id": "5721b536-b78d-4efc-b077-e28ece1968e9",
+    "status": "original",
+    "confidence": 61.34459215071687,
+    "platform": "Internal Processing",
+    "timestamp": "2026-04-30T20:10:08.795Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "ed6a5fe9-fc87-4c18-8596-5973b9d519fd",
+    "status": "original",
+    "confidence": 61.82147287474587,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:10:15.788Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "f1cf0c19-6ef5-4396-8b7d-68c4de2790f2",
+    "status": "original",
+    "confidence": 68.38025537894714,
+    "platform": "Blog Network X",
+    "timestamp": "2026-04-30T20:10:22.791Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "16a884e7-8141-4fde-9656-553148154910",
+    "status": "original",
+    "confidence": 84.06871645900917,
+    "platform": "Streaming Platform",
+    "timestamp": "2026-04-30T20:10:29.786Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "e23f519c-e042-4441-8ed2-822720cba118",
+    "status": "original",
+    "confidence": 74.39942348046239,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:11:29.790Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "9f29a504-f96a-4ee2-a22c-1f8a362832c0",
+    "status": "original",
+    "confidence": 71.72500632622904,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:12:29.791Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "2e42087f-e219-4e29-acc3-111ea058b01d",
+    "status": "original",
+    "confidence": 65.92593831366521,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:13:29.783Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "85003644-d4b8-4a2a-b723-49d769c4fadc",
+    "status": "original",
+    "confidence": 64.96848260526323,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:14:29.784Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "8d3b3a65-1d84-4c68-b5cd-6add7fcf9a89",
+    "status": "original",
+    "confidence": 68.60615550028544,
+    "platform": "Streaming Platform",
+    "timestamp": "2026-04-30T20:15:29.791Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "c6885c6f-a439-4bfa-a0df-c808d37f0c1c",
+    "status": "original",
+    "confidence": 62.08329359636364,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:16:29.791Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "cd92c19e-527f-46e3-b825-538053943b07",
+    "status": "original",
+    "confidence": 81.06514322105114,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:17:29.786Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "1e5bd626-40fa-4d5c-8373-93e63ba245db",
+    "status": "original",
+    "confidence": 66.6423994637236,
+    "platform": "Sports News Platform",
+    "timestamp": "2026-04-30T20:18:29.794Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "7a33eca5-951c-4aa4-a2ed-8060da37977b",
+    "status": "original",
+    "confidence": 60.59734301571717,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:19:29.794Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "f216ff96-9982-46f5-b0e1-d7ef86ea986e",
+    "status": "original",
+    "confidence": 79.59092141166022,
+    "platform": "Streaming Platform",
+    "timestamp": "2026-04-30T20:20:29.795Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "9c52234d-cc7a-47d9-aca0-0de6639a6c5c",
+    "status": "original",
+    "confidence": 84.74089153781587,
+    "platform": "Blog Network X",
+    "timestamp": "2026-04-30T20:21:29.792Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "dbdc6e44-7ce4-4e21-a5f3-51ade8485aaf",
+    "status": "original",
+    "confidence": 81.00341114677916,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:22:29.782Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "2ed82ae4-6998-40cc-8013-e012a30c7854",
+    "status": "original",
+    "confidence": 64.21088426560175,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:23:29.787Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "ffc80a88-1e7a-4c5f-8fc8-bc4936eb4812",
+    "status": "original",
+    "confidence": 68.15582807900874,
+    "platform": "Internal Processing",
+    "timestamp": "2026-04-30T20:24:29.790Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "bff885bd-7120-404c-a772-be05e9096be3",
+    "status": "original",
+    "confidence": 75.3085188466412,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:25:29.782Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "6e161abc-44ac-45d4-a715-a9dd41f7845a",
+    "status": "original",
+    "confidence": 70.92536731184224,
+    "platform": "Sports News Platform",
+    "timestamp": "2026-04-30T20:26:29.786Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "d97e4858-906b-4e15-a743-c44aaaf35d32",
+    "status": "unauthorized",
+    "confidence": 95.580610250885,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:27:29.796Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "f3cf680c-514f-4878-81e2-39fc8c9e2e46",
+    "status": "original",
+    "confidence": 66.63528495612576,
+    "platform": "Streaming Platform",
+    "timestamp": "2026-04-30T20:28:29.796Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "9711efe4-3b8f-4883-a374-6391e6f8a3c3",
+    "status": "original",
+    "confidence": 74.15295154183838,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:29:29.790Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "59a3e5a7-4fd3-42ac-a620-a6618509de60",
+    "status": "original",
+    "confidence": 79.1392966648118,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:30:29.784Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "9bda9515-0264-42b4-b6ab-57ffdd0a288a",
+    "status": "original",
+    "confidence": 75.44371005734507,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:31:29.796Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "e80a025f-88d4-4993-94bf-27c28431666f",
+    "status": "original",
+    "confidence": 67.8512069683751,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:32:29.783Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "c6b3f589-80d1-4de4-9b33-2446ab482102",
+    "status": "original",
+    "confidence": 84.86224077232637,
+    "platform": "Sports News Platform",
+    "timestamp": "2026-04-30T20:33:29.784Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "89f939b5-e563-4f7c-a537-84e88a91593e",
+    "status": "original",
+    "confidence": 74.3556301075854,
+    "platform": "Internal Processing",
+    "timestamp": "2026-04-30T20:34:29.787Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "46ae924d-2428-4a77-b13f-25b03e3802b0",
+    "status": "original",
+    "confidence": 67.51598092054043,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:35:29.789Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "00e09181-35f0-41e3-8c6a-1a54acb2e2f2",
+    "status": "original",
+    "confidence": 71.6830474020505,
+    "platform": "Streaming Platform",
+    "timestamp": "2026-04-30T20:36:29.790Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "95d421b0-c2fa-474f-9370-3b9dd0da6e3a",
+    "status": "original",
+    "confidence": 71.1572289719869,
+    "platform": "Blog Network X",
+    "timestamp": "2026-04-30T20:37:29.789Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "7ed0a283-ddf4-4ed0-83a5-bbdc193b9d62",
+    "status": "original",
+    "confidence": 70.70764570121722,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:38:29.789Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "f1dd1993-4db8-4dba-87e6-fc033f7cbbe7",
+    "status": "original",
+    "confidence": 69.90665184604414,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:39:29.781Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "56766c16-0ae3-4f48-bd37-0ecbfdf252d9",
+    "status": "original",
+    "confidence": 77.569885853561,
+    "platform": "Sports News Platform",
+    "timestamp": "2026-04-30T20:40:29.790Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "ed6d5a21-30a2-4f05-b880-1207a7c84e9a",
+    "status": "original",
+    "confidence": 71.95504376912338,
+    "platform": "Blog Network X",
+    "timestamp": "2026-04-30T20:41:29.792Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "c97b3acd-4bb4-436f-8176-9d7db02ad541",
+    "status": "original",
+    "confidence": 66.85607449260417,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:42:29.784Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "e1c1dfc1-05a3-4c4f-bf2f-3fc2d21b01cb",
+    "status": "original",
+    "confidence": 68.22866131384475,
+    "platform": "Streaming Platform",
+    "timestamp": "2026-04-30T20:43:29.793Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "d6f515da-551c-477b-95f7-3e7ca4ab78d0",
+    "status": "unauthorized",
+    "confidence": 94.51892668385233,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:44:29.789Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "aaba6647-ac7e-4b1b-a4d8-37e38bd94345",
+    "status": "unauthorized",
+    "confidence": 92.8093777388606,
+    "platform": "Blog Network X",
+    "timestamp": "2026-04-30T20:45:29.786Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "3147c9ce-fbb6-4458-8783-8c8c5101482b",
+    "status": "unauthorized",
+    "confidence": 86.2376119013571,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:46:29.790Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "fb4214c4-409a-40a2-b452-4b068fc0f578",
+    "status": "original",
+    "confidence": 84.85190254387078,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:47:29.797Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "34e41750-6ba1-418b-b89f-a11f1eea94f6",
+    "status": "original",
+    "confidence": 71.74422048085994,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:48:29.783Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "2338aa1e-62f5-44af-8cb3-6db76ea6ba89",
+    "status": "original",
+    "confidence": 68.19891956522628,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:49:29.793Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "43672e5d-0244-40cb-a9e0-6bc2cac39d9e",
+    "status": "original",
+    "confidence": 68.82253033008408,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:50:29.794Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "db0a1dde-583b-4bac-a1df-1392ab0539a5",
+    "status": "original",
+    "confidence": 64.43000259328839,
+    "platform": "Sports News Platform",
+    "timestamp": "2026-04-30T20:51:29.794Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "38a49067-6f38-406d-a9fb-224c964aeb5d",
+    "status": "original",
+    "confidence": 81.64566237488725,
+    "platform": "Streaming Platform",
+    "timestamp": "2026-04-30T20:52:29.790Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "9ef290c3-45b0-4ddf-9871-91be2c2fad08",
+    "status": "original",
+    "confidence": 68.70075721522872,
+    "platform": "Internal Processing",
+    "timestamp": "2026-04-30T20:53:29.789Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "97386f3e-114d-475a-a7d7-33cbf02b16ef",
+    "status": "original",
+    "confidence": 64.19693667175707,
+    "platform": "Sports News Platform",
+    "timestamp": "2026-04-30T20:54:29.795Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "ff0e0889-de73-4e79-9f33-b86770f7baf0",
+    "status": "original",
+    "confidence": 69.659166124445,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:55:21.904Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "7ac89d79-26fe-4836-ae2c-b4d934e768a9",
+    "status": "original",
+    "confidence": 83.34648117413809,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:55:23.856Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  }
+]

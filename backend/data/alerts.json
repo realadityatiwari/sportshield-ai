@@ -1,0 +1,42 @@
+[
+  {
+    "id": "d22c3e2e-437b-42b6-9f80-229b64ab4a9b",
+    "status": "resolved",
+    "confidence": 100,
+    "platform": "Social Media",
+    "timestamp": "2026-04-29T18:38:14.879Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  },
+  {
+    "id": "4b7bfdc4-384d-4cfe-ac4e-5bf75cfaf69d",
+    "status": "resolved",
+    "confidence": 100,
+    "platform": "Social Media",
+    "timestamp": "2026-04-29T19:29:33.441Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "854c4d07-935b-43ed-b2d5-3707fac31d6a",
+    "status": "active",
+    "confidence": 93.21339018312243,
+    "platform": "Blog Network X",
+    "timestamp": "2026-04-30T19:53:19.856Z",
+    "matchedMediaId": "3b26f8ed-35a8-4fd8-a95d-573b3d00acb3"
+  },
+  {
+    "id": "752b7da3-65a8-4e3a-929d-a6a5630c4df6",
+    "status": "active",
+    "confidence": 90.12673134556049,
+    "platform": "Blog Network X",
+    "timestamp": "2026-04-30T19:53:48.781Z",
+    "matchedMediaId": "452a6e8b-465b-4a7f-a1a4-2de54369b093"
+  },
+  {
+    "id": "96a9af3a-c2c0-4b3d-be86-30f6701d65f0",
+    "status": "active",
+    "confidence": 88.42896537233528,
+    "platform": "Social Media",
+    "timestamp": "2026-04-30T20:07:29.783Z",
+    "matchedMediaId": "d26f6777-959a-4bfe-aedd-790ccb5ca5ad"
+  }
+]
