@@ -9,6 +9,134 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <div id="landingPage" class="landing-page">
+        <!-- Navigation -->
+        <nav class="landing-nav">
+            <div class="landing-logo">
+                <i class="fa-solid fa-shield-halved text-primary"></i> Sport<span class="text-primary">Shield</span> <span class="badge-sm">AI</span>
+            </div>
+            <div class="landing-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How it works</a>
+                <button class="landing-login-btn" onclick="enterDashboard()">Login / Dashboard</button>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="landing-hero">
+            <h1>Track. Detect. Protect your sports media.</h1>
+            <p>AI-powered forensic fingerprinting to instantly catch unauthorized redistribution across the web.</p>
+            <div class="landing-cta-group">
+                <button class="primary-btn-large" onclick="enterDashboard()">Get Started</button>
+                <button class="secondary-btn-large" onclick="document.getElementById('preview-section').scrollIntoView({behavior: 'smooth'})">View Demo</button>
+            </div>
+        </section>
+
+        <!-- Stats Strip -->
+        <section class="landing-stats-strip">
+            <div class="stat-item">
+                <h3>100k+</h3>
+                <p>Media Tracked</p>
+            </div>
+            <div class="stat-item">
+                <h3>5M+</h3>
+                <p>Detections</p>
+            </div>
+            <div class="stat-item">
+                <h3>99.9%</h3>
+                <p>Accuracy</p>
+            </div>
+        </section>
+
+        <!-- Feature Highlights -->
+        <section id="features" class="landing-features">
+            <div class="feature-card">
+                <i class="fa-solid fa-bolt text-primary fa-2x"></i>
+                <h3>Real-time detection</h3>
+                <p>Identify pirated streams and unauthorized uploads within seconds of them going live.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-layer-group text-primary fa-2x"></i>
+                <h3>Visual proof</h3>
+                <p>Generate undeniable pixel-level difference maps highlighting unauthorized modifications.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fa-solid fa-bell text-primary fa-2x"></i>
+                <h3>Automated alerts</h3>
+                <p>Instantly notify rights holders and automatically issue takedown requests.</p>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section id="how-it-works" class="landing-how-it-works">
+            <h2>How it works</h2>
+            <div class="steps-container">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Upload media</h3>
+                    <p>Register your protected assets to generate a unique perceptual hash fingerprint.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Detect matches</h3>
+                    <p>The system constantly scans platforms using Hamming distance to find structural matches.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Take action</h3>
+                    <p>Review visual proof and issue instant takedown notices directly from the dashboard.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview Section -->
+        <section id="preview-section" class="landing-preview">
+            <div class="mock-browser-window">
+                <div class="mock-browser-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="mock-browser-body">
+                    <!-- simplified mockup of dashboard -->
+                    <div class="mock-sidebar">
+                        <div style="height: 20px; width: 80%; background: var(--border); margin-bottom: 20px; border-radius: 4px;"></div>
+                        <div style="height: 12px; width: 60%; background: var(--border); margin-bottom: 10px; border-radius: 4px;"></div>
+                        <div style="height: 12px; width: 70%; background: var(--border); margin-bottom: 10px; border-radius: 4px;"></div>
+                        <div style="height: 12px; width: 50%; background: var(--border); border-radius: 4px;"></div>
+                    </div>
+                    <div class="mock-main">
+                        <div class="mock-header-bar">
+                            <div style="height: 24px; width: 40%; background: var(--border); border-radius: 4px;"></div>
+                            <div style="height: 24px; width: 24px; border-radius: 50%; background: var(--primary); margin-left: auto;"></div>
+                        </div>
+                        <div class="mock-content-area">
+                            <div class="mock-card mock-hero-card">
+                                <div style="width: 40%; height: 200px; background: rgba(37, 99, 235, 0.1); border-radius: 8px;"></div>
+                                <div style="flex: 1; padding: 20px;">
+                                    <div style="height: 16px; width: 80%; background: var(--primary); margin-bottom: 16px; border-radius: 4px; opacity: 0.8;"></div>
+                                    <div style="height: 12px; width: 100%; background: var(--border); margin-bottom: 8px; border-radius: 4px;"></div>
+                                    <div style="height: 12px; width: 90%; background: var(--border); margin-bottom: 8px; border-radius: 4px;"></div>
+                                    <div style="height: 12px; width: 60%; background: var(--border); border-radius: 4px;"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 20px; margin-top: 20px;">
+                                <div class="mock-card" style="flex: 1; height: 100px;"></div>
+                                <div class="mock-card" style="flex: 1; height: 100px;"></div>
+                                <div class="mock-card" style="flex: 1; height: 100px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="landing-footer">
+            <p>&copy; 2026 SportShield AI. All rights reserved.</p>
+        </footer>
+    </div>
+    <div id="dashboardApp" style="display: none; opacity: 0; transition: opacity 0.5s ease;">
     <div class="dashboard-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
@@ -321,6 +449,7 @@
 
             </div>
         </main>
+    </div>
     </div>
     <script src="script.js"></script>
 </body>

@@ -17,7 +17,7 @@
   },
   {
     "id": "854c4d07-935b-43ed-b2d5-3707fac31d6a",
-    "status": "active",
+    "status": "resolved",
     "confidence": 93.21339018312243,
     "platform": "Blog Network X",
     "timestamp": "2026-04-30T19:53:19.856Z",
@@ -25,7 +25,7 @@
   },
   {
     "id": "752b7da3-65a8-4e3a-929d-a6a5630c4df6",
-    "status": "active",
+    "status": "resolved",
     "confidence": 90.12673134556049,
     "platform": "Blog Network X",
     "timestamp": "2026-04-30T19:53:48.781Z",
@@ -33,7 +33,7 @@
   },
   {
     "id": "96a9af3a-c2c0-4b3d-be86-30f6701d65f0",
-    "status": "active",
+    "status": "resolved",
     "confidence": 88.42896537233528,
     "platform": "Social Media",
     "timestamp": "2026-04-30T20:07:29.783Z",

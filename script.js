@@ -162,7 +162,7 @@ function renderAnalytics() {
             <li>
                 <div class="feed-point black-point"></div>
                 <div class="feed-content">
-                    <p><strong>${mediaName} (UUID: ${mediaId}):</strong> <span style="color:var(--danger); font-weight:600;">${count} alerts</span></p>
+                    <p><a href="#" onclick="window.switchTab('page-alerts', 'alert-${mediaId}'); return false;" style="text-decoration:none; color:var(--text-main); transition:color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-main)'"><strong>${mediaName} (UUID: ${mediaId}):</strong></a> <span style="color:var(--danger); font-weight:600;">${count} alerts</span></p>
                 </div>
             </li>
         `;
@@ -268,13 +268,28 @@ function renderMonitoring() {
         if (entry.confidence >= 70 && entry.confidence < MATCH_THRESHOLD) miniProgressColor = "var(--warning)";
         if (entry.confidence >= MATCH_THRESHOLD) miniProgressColor = "var(--danger)";
         
-        const thumbUi = `<div class="thumb-mock" style="background:#e2e8f0; display:flex; align-items:center; justify-content:center; color:var(--text-muted);"><i class="fa-solid fa-image"></i></div>`;
+        let mediaLinkHtml = `<div class="thumb-mock" style="background:#e2e8f0; display:flex; align-items:center; justify-content:center; color:var(--text-muted);"><i class="fa-solid fa-image"></i></div>`;
+        if (entry.matchedMediaId) {
+            const media = mediaDB.find(m => m.id === entry.matchedMediaId);
+            if (media) {
+                mediaLinkHtml = `<a href="#" onclick="window.switchTab('page-upload', '${entry.matchedMediaId}'); return false;" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--primary); font-weight:500;">
+                                    <div class="thumb-mock" style="background-image:url('/${media.name}'); background-size:cover; background-position:center; width:30px; height:30px; border-radius:4px;"></div>
+                                    ${media.name}
+                                 </a>`;
+            }
+        }
+        
+        let actionHtml = '';
+        if (isUnauth) {
+            actionHtml = `<button class="action-btn sm-btn secondary-btn" onclick="window.switchTab('page-alerts', 'alert-${entry.matchedMediaId}')" style="margin-top: 4px; padding: 4px 8px; font-size: 11px;">View Alert</button>`;
+        }
+        
         const platformIcon = getPlatformIcon(entry.platform);
         
         tableBody.innerHTML += `
             <tr class="${isUnauth ? 'row-unauthorized' : ''}" style="animation: fadeIn 0.3s ease;">
-                <td>${thumbUi}</td>
-                <td><span class="badge ${badgeClass}">${displayStatus}</span></td>
+                <td>${mediaLinkHtml}</td>
+                <td><span class="badge ${badgeClass}">${displayStatus}</span><br>${actionHtml}</td>
                 <td>
                     <span style="display:inline-block; width:45px;">${entry.confidence.toFixed(1)}%</span>
                     <div class="mini-progress-bar"><div class="mini-progress-fill" style="width:${entry.confidence}%; background-color:${miniProgressColor}"></div></div>
@@ -332,12 +347,25 @@ function renderAlerts() {
             actionBtn = `<span class="status-icon"><i class="fa-solid fa-check"></i></span>`;
         }
         
+        let mediaLinkHtml = '';
+        if (alert.matchedMediaId) {
+            const media = mediaDB.find(m => m.id === alert.matchedMediaId);
+            if (media) {
+                mediaLinkHtml = `<a href="#" onclick="window.switchTab('page-upload', '${alert.matchedMediaId}'); return false;" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--text-muted); font-size:11px; margin-top:8px;">
+                                    <div class="thumb-mock" style="background-image:url('/${media.name}'); background-size:cover; background-position:center; width:20px; height:20px; border-radius:3px;"></div>
+                                    View Original Media: <strong style="color:var(--text-main);">${media.name}</strong>
+                                 </a>`;
+            } else {
+                mediaLinkHtml = `<p style="font-size:11px; margin-top:4px; opacity:0.7;">Matched Internal Reference: ${alert.matchedMediaId}</p>`;
+            }
+        }
+
         container.innerHTML += `
-            <div class="alert-card ${severityClass}" style="animation: fadeIn 0.3s ease;">
+            <div id="alert-${alert.matchedMediaId}" class="alert-card ${severityClass}" style="animation: fadeIn 0.3s ease;">
                 <div class="alert-info">
                     <h3>Unauthorized Media Detected</h3>
                     <p>Detected on: ${alert.platform} (${alert.confidence.toFixed(1)}% Match) at ${timeString}</p>
-                    ${alert.matchedMediaId ? `<p style="font-size:11px; margin-top:4px; opacity:0.7;">Matched Internal Reference: ${alert.matchedMediaId}</p>` : ''}
+                    ${mediaLinkHtml}
                 </div>
                 ${actionBtn}
             </div>
@@ -1324,3 +1352,81 @@ async function generateDiffMap(uploadedSrc, referenceSrc) {
         diffCtx.fillText('Reference image failed to load', targetSize / 2, targetSize / 2);
     }
 }
+
+// --- Landing Page Transition Logic ---
+window.enterDashboard = function() {
+    const landing = document.getElementById('landingPage');
+    const dashboard = document.getElementById('dashboardApp');
+    
+    if (landing && dashboard) {
+        landing.style.opacity = '0';
+        
+        setTimeout(() => {
+            landing.style.display = 'none';
+            dashboard.style.display = 'flex';
+            
+            // Trigger reflow
+            void dashboard.offsetWidth;
+            
+            dashboard.style.opacity = '1';
+            
+            // Update URL to match product feel
+            window.history.pushState({}, '', '/dashboard');
+        }, 500); // Wait for fade out
+    }
+};
+
+// --- Contextual Navigation Logic ---
+window.switchTab = function(targetId, contextId) {
+    const targetNav = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+    if (targetNav) targetNav.click();
+    
+    if (targetId === 'page-alerts' && contextId) {
+        setTimeout(() => {
+            const alertCard = document.getElementById(contextId);
+            if (alertCard) {
+                alertCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                alertCard.style.transition = 'box-shadow 0.3s ease, background-color 0.3s ease';
+                const originalBg = alertCard.style.backgroundColor;
+                const originalBoxShadow = alertCard.style.boxShadow;
+                
+                alertCard.style.backgroundColor = 'rgba(37, 99, 235, 0.1)';
+                alertCard.style.boxShadow = '0 0 0 2px var(--primary)';
+                
+                setTimeout(() => {
+                    alertCard.style.backgroundColor = originalBg;
+                    alertCard.style.boxShadow = originalBoxShadow;
+                }, 2000);
+            }
+        }, 100);
+    } 
+    else if (targetId === 'page-upload' && contextId) {
+        setTimeout(() => {
+            const media = mediaDB.find(m => m.id === contextId);
+            if (media) {
+                const imagePreview = document.getElementById('imagePreview');
+                const previewSection = document.getElementById('previewSection');
+                const uploadText = document.getElementById('uploadText');
+                const checkButton = document.getElementById('checkButton');
+                
+                imagePreview.src = '/' + media.name;
+                imagePreview.onload = () => {
+                    previewSection.style.display = 'block';
+                    uploadText.textContent = media.name;
+                    checkButton.disabled = false;
+                    
+                    // Simulate checking
+                    checkButton.click();
+                    
+                    // Scroll to result after scan completes (async timeline)
+                    setTimeout(() => {
+                        const resultSection = document.getElementById('resultSection');
+                        if (resultSection) {
+                            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 2800);
+                };
+            }
+        }, 100);
+    }
+};
